@@ -538,7 +538,7 @@ document.querySelectorAll('.faq-q').forEach(function(q) {
 
 var selectedFiles=[];function showFiles(inp){var lbl=String.fromCharCode(1511,1489,1510,1497,1501);for(var j=0;j<inp.files.length;j++){if(selectedFiles.length<10){selectedFiles.push(inp.files[j]);}else{alert(String.fromCharCode(1504,1497,1514,1503,32,1506,1491,32,49,48,32)+lbl);break;}}inp.value="";renderFiles();}function renderFiles(){var box=document.getElementById("filelist");if(selectedFiles.length===0){box.innerHTML="";return;}var lbl=String.fromCharCode(1511,1489,1510,1497,1501);var h="<div style='color:var(--gold);font-weight:600;margin-bottom:6px;'>"+selectedFiles.length+" "+lbl+":</div>";for(var k=0;k<selectedFiles.length;k++){h+="<div style='background:var(--dark2);padding:6px 10px;border-radius:6px;margin-top:4px;font-size:0.85em;color:var(--text);display:flex;justify-content:space-between;align-items:center;'><span>"+selectedFiles[k].name+"</span><span onclick='removeFile("+k+")' style='cursor:pointer;color:#e74c3c;font-weight:bold;padding:0 8px;'>X</span></div>";}box.innerHTML=h;}function removeFile(i){selectedFiles.splice(i,1);renderFiles();}
 function toggleSrc(el){var p=el.querySelector(".src-ext");if(p)p.style.display=p.style.display==="none"?"block":"none";}
-function jumpSrc(n){var items=document.querySelectorAll(".source-item");if(items.length>=n){var el=items[n-1];el.scrollIntoView({behavior:"smooth",block:"center"});var ext=el.querySelector(".src-ext");if(ext)ext.style.display="block";el.style.transition="background 0.3s";var orig=el.style.background;el.style.background="var(--gold-dim)";setTimeout(function(){el.style.background=orig;},1500);}}
+function linkSrc(t){return t.replace(/\[\u05de\u05e7\u05d5\u05e8 (\d+)\]/g,function(m,n){return '<a href="#" onclick="jumpSrc('+n+');return false;" style="color:var(--gold);font-weight:700;text-decoration:none;border-bottom:1px dotted var(--gold);">'+m+'</a>';});} function jumpSrc(n){var items=document.querySelectorAll(".source-item");if(items.length>=n){var el=items[n-1];el.scrollIntoView({behavior:"smooth",block:"center"});var ext=el.querySelector(".src-ext");if(ext)ext.style.display="block";el.style.transition="background 0.3s";var orig=el.style.background;el.style.background="var(--gold-dim)";setTimeout(function(){el.style.background=orig;},1500);}}
 async function search() {
   var rawQuery = document.getElementById('query').value;
   var query = rawQuery;
@@ -569,7 +569,7 @@ async function search() {
     var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><button class="btn-pdf" onclick="exportPDF()">ייצוא PDF</button></div>';
     var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
     ans.innerHTML = hdr + '<div class="answer-body"></div>' + disc;
-    ans.querySelector(".answer-body").innerHTML=data.answer.split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>");
+    ans.querySelector(".answer-body").innerHTML=linkSrc(data.answer).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>");
     ans.style.display='block';
     if (data.sources) {
       let html='<div class="sources-title">מקורות:</div>';
@@ -604,6 +604,14 @@ async def history(request: Request):
         return JSONResponse({"error": "unauthorized"}, status_code=401)
     return database.get_history(user["email"])
 
+
+@app.delete("/history/{entry_id}")
+async def delete_history(entry_id: int, request: Request):
+    user = auth.get_current_user(request)
+    if not user or not user.get("allowed"):
+        return JSONResponse({"error": "non autorise"}, status_code=401)
+    database.delete_entry(user["email"], entry_id)
+    return JSONResponse({"ok": True})
 @app.get("/mon-historique", response_class=HTMLResponse)
 async def mon_historique(request: Request):
     user = auth.get_current_user(request)
