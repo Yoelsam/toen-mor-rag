@@ -1,4 +1,5 @@
 import re
+import time
 import os, pickle, logging
 from pathlib import Path
 import chromadb
@@ -36,8 +37,12 @@ def search_docs(query, n=5):
     results = collection.query(query_texts=[query], n_results=n)
     return results["documents"][0], results["metadatas"][0]
 
-def ask_gemini(query, docs, metas):
+def ask_gemini(query, docs, metas, history=None):
     context = "\n\n".join(f"[\u05DE\u05E7\u05D5\u05E8 {i+1}: {m['filename']}]\n{d}" for i,(d,m) in enumerate(zip(docs,metas)))
+    history_text = ""
+    if history:
+        for h in history[-4:]:
+            history_text += f"\n\u05E9\u05D0\u05DC\u05D4 \u05E7\u05D5\u05D3\u05DE\u05EA: {h['q']}\n\u05EA\u05E9\u05D5\u05D1\u05D4 \u05E7\u05D5\u05D3\u05DE\u05EA: {h['a'][:500]}\n---"
     prompt = f"""אתה עוזר משפטי המתמחה בדיני משפחה ובדיני עבודה בישראל.
 אם השאלה אינה שאלה משפטית ברורה (ברכה, שיחת חולין, מילה בודדת), ענה אך ורק: "אנא הקלד שאלה משפטית ברורה" ללא הסבר נוסף ואל תחפש מקורות.
 ענה על השאלה הבאה בהתבסס אך ורק על המקורות שסופקו.
@@ -65,7 +70,7 @@ def home():
     })
 
 @app.post("/api/search")
-async def search(request: Request, query: str = Form(...)):
+async def search(request: Request, query: str = Form(...), history: str = Form("[]")):
     try:
         q=query.strip()
         heb=sum(1 for c in q if 0x05D0<=ord(c)<=0x05EA)
@@ -77,7 +82,12 @@ async def search(request: Request, query: str = Form(...)):
         if NON_LEGAL.match(q) or len(q)<5 or heb<3 or (len(words)<2 and heb<6):
             return JSONResponse({"answer":"אנא הקלד שאלה משפטית ברורה","sources":[]})
         docs, metas = search_docs(query)
-        answer = ask_gemini(query, docs, metas)
+        import json as _json
+        try:
+            hist_data = _json.loads(history) if history else []
+        except Exception:
+            hist_data = []
+        answer = ask_gemini(query, docs, metas, history=hist_data)
         seen=set();sources=[]
         for d,m in zip(docs,metas):
             if m["filename"] not in seen:
@@ -228,6 +238,9 @@ footer { background:var(--dark3); border-top:1px solid var(--border); padding:22
 .footer-link { color:var(--gold); text-decoration:none; }
 .footer-link:hover { color:var(--gold-light); }
 .footer-tech { color:var(--text-dim); font-size:0.75em; }
+.btn-new-chat { background:linear-gradient(135deg,#1a5c3a,#0f3d26); border:1px solid #2ecc71; color:#2ecc71; padding:13px 18px; border-radius:10px; font-family:"Heebo",sans-serif; font-size:0.92em; cursor:pointer; margin-top:14px; margin-left:8px; transition:all 0.2s; }
+.btn-new-chat:hover { background:linear-gradient(135deg,#2ecc71,#27ae60); color:#0a0e14; font-weight:700; }
+.chat-history-indicator { display:none; background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); border-radius:8px; padding:8px 14px; margin-bottom:10px; font-size:0.85em; color:#2ecc71; }
 .btn-reset-search { background:rgba(192,57,43,0.08); border:1px solid rgba(231,76,60,0.4); color:#e07a6f; padding:13px 18px; border-radius:10px; font-family:'Heebo',sans-serif; font-size:0.9em; cursor:pointer; margin-top:14px; float:left; transition:all 0.2s; }
 .btn-reset-search:hover { background:rgba(192,57,43,0.18); border-color:#e74c3c; color:#ff6b5b; }
 .search-box::after { content:''; display:table; clear:both; }
@@ -331,14 +344,14 @@ footer { background:var(--dark3); border-top:1px solid var(--border); padding:22
   </div>
   <div class="filters-pills" id="filters-pills"></div>
 </div>
-<textarea id="query" placeholder="&#x05D4;&#x05E7;&#x05DC;&#x05D3; &#x05D0;&#x05EA; &#x05E9;&#x05D0;&#x05DC;&#x05EA;&#x05DA; &#x05D4;&#x05DE;&#x05E9;&#x05E4;&#x05D8;&#x05D9;&#x05EA; &#x05DB;&#x05D0;&#x05DF;..."></textarea>
+<div class="chat-history-indicator" id="chat-indicator">&#x1F4AC; &#x05E9;&#x05D9;&#x05D7;&#x05D4; &#x05E4;&#x05E2;&#x05D9;&#x05DC;&#x05D4; &mdash; <span id="chat-count">0</span> &#x05E9;&#x05D0;&#x05DC;&#x05D5;&#x05EA; &#x05D1;&#x05D4;&#x05E7;&#x05E9;&#x05E8; &mdash; &#x05DC;&#x05E9;&#x05D9;&#x05D7;&#x05D4; &#x05D7;&#x05D3;&#x05E9;&#x05D4; &#x05DC;&#x05D7;&#x05E5; &#x05E2;&#x05DC; &#x05D4;&#x05DB;&#x05E4;&#x05EA;&#x05D5;&#x05E8; &#x05D4;&#x05D9;&#x05E8;&#x05D5;&#x05E7;</div><textarea id="query" placeholder="&#x05D4;&#x05E7;&#x05DC;&#x05D3; &#x05D0;&#x05EA; &#x05E9;&#x05D0;&#x05DC;&#x05EA;&#x05DA; &#x05D4;&#x05DE;&#x05E9;&#x05E4;&#x05D8;&#x05D9;&#x05EA; &#x05DB;&#x05D0;&#x05DF;..."></textarea>
 <div class="upload-area" onclick="document.getElementById('file').click()">
 &#x1F4CE; &#x05D4;&#x05E2;&#x05DC;&#x05D4; &#x05DE;&#x05E1;&#x05DE;&#x05DA; (&#x05D0;&#x05D5;&#x05E4;&#x05E6;&#x05D9;&#x05D5;&#x05E0;&#x05DC;&#x05D9;) - <span id="filename">&#x05DC;&#x05D0; &#x05E0;&#x05D1;&#x05D7;&#x05E8; &#x05E7;&#x05D5;&#x05D1;&#x05E5;</span>
 <input type="file" id="file" style="display:none" accept=".docx,.pdf,.txt" multiple onchange="showFiles(this)">
 </div>
 <div id="filelist" style="margin-top:10px;"></div>
 <button class="btn" onclick="search()">&#x1F50D; &#x05D7;&#x05E4;&#x05E9; &#x05D1;&#x05DE;&#x05D0;&#x05D2;&#x05E8;</button>
-<button class="btn-help" id="help-btn">&#x1F4A1; &#x05DB;&#x05D9;&#x05E6;&#x05D3; &#x05DC;&#x05D7;&#x05E4;&#x05E9;?</button><button class="btn-reset-search" id="reset-search-btn">&#x1F5D1;&#xFE0F; &#x05E0;&#x05E7;&#x05D4; &#x05D4;&#x05DB;&#x05DC;</button>
+<button class="btn-help" id="help-btn">&#x1F4A1; &#x05DB;&#x05D9;&#x05E6;&#x05D3; &#x05DC;&#x05D7;&#x05E4;&#x05E9;?</button><button class="btn-new-chat" id="new-chat-btn">&#x1F4AC; &#x05E9;&#x05D9;&#x05D7;&#x05D4; &#x05D7;&#x05D3;&#x05E9;&#x05D4;</button><button class="btn-reset-search" id="reset-search-btn">&#x1F5D1;&#xFE0F; &#x05E0;&#x05E7;&#x05D4; &#x05D4;&#x05DB;&#x05DC;</button>
 </div>
 <div class="loading" id="loading">
   <div class="spinner"></div>
@@ -501,6 +514,26 @@ var _tb=document.getElementById('try-free-btn');if(_tb)_tb.addEventListener('cli
 });
 
 
+// ===== HISTORIQUE CONVERSATION =====
+var chatHistory = [];
+
+function updateChatIndicator() {
+  var ind = document.getElementById("chat-indicator");
+  var cnt = document.getElementById("chat-count");
+  if (chatHistory.length > 0) {
+    ind.style.display = "block";
+    cnt.textContent = chatHistory.length;
+  } else {
+    ind.style.display = "none";
+  }
+}
+
+document.getElementById("new-chat-btn").addEventListener("click", function() {
+  chatHistory = [];
+  updateChatIndicator();
+  resetSearch();
+});
+
 // ===== RESET RECHERCHE =====
 function resetSearch() {
   document.getElementById('query').value = '';
@@ -560,6 +593,7 @@ async function search() {
     } else {
       const fd = new FormData();
       fd.append('query', query);
+      fd.append('history', JSON.stringify(chatHistory));
       resp = await fetch('/api/search', {method:'POST', body:fd});
     }
     const data = await resp.json();
@@ -569,11 +603,12 @@ async function search() {
     var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><button class="btn-pdf" onclick="exportPDF()">ייצוא PDF</button></div>';
     var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
     ans.innerHTML = hdr + '<div class="answer-body"></div>' + disc;
+    chatHistory.push({q: rawQuery, a: data.answer}); updateChatIndicator();
     ans.querySelector(".answer-body").innerHTML=linkSrc(data.answer).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>");
     ans.style.display='block';
     if (data.sources) {
       let html='<div class="sources-title">מקורות:</div>';
-      data.sources.forEach(function(s,idx){var ext=s.extrait||'';html+='<div class="source-item" onclick="toggleSrc(this)" style="cursor:pointer;">&#128196; '+s.filename+'<div class="src-ext" style="display:none;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:var(--dark2);padding:12px;border-radius:6px;direction:rtl;">'+ext+'</div></div>';});
+      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;html+='<div class="source-item" id="src-item-'+num+'" onclick="toggleSrc(this)" style="cursor:pointer;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+'<div class="src-ext" style="display:none;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:var(--dark2);padding:12px;border-radius:6px;direction:rtl;">'+ext+'</div></div>';});
       document.getElementById('sources').innerHTML=html;
     }
   } catch(e) {
