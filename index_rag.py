@@ -1,4 +1,4 @@
-import os, io, pickle, time, logging
+import os, io, pickle, time, logging, json
 from pathlib import Path
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
@@ -40,7 +40,7 @@ def list_files(service, folder_id):
     while True:
         resp = service.files().list(
             q=f"'{folder_id}' in parents and trashed=false",
-            fields="nextPageToken, files(id, name, mimeType)",
+            fields="nextPageToken, files(id, name, mimeType, modifiedTime)",
             pageToken=page_token, pageSize=100
         ).execute()
         files.extend(resp.get("files", []))
@@ -113,47 +113,62 @@ def main():
 
     # ChromaDB
     client = chromadb.PersistentClient(path=CHROMA_DIR)
+    INDEXED_DB = "/home/rag/indexed_files.json"
+    import json
+    if os.path.exists(INDEXED_DB):
+        with open(INDEXED_DB, "r") as fj:
+            indexed = json.load(fj)
+    else:
+        indexed = {}
+    client = chromadb.PersistentClient(path=CHROMA_DIR)
     try:
-        client.delete_collection(COLLECTION_NAME)
+        collection = client.get_collection(COLLECTION_NAME)
     except:
-        pass
-    collection = client.create_collection(COLLECTION_NAME)
-
+        collection = client.create_collection(COLLECTION_NAME)
     total_chunks = 0
+    new_files = 0
+    skipped = 0
     for i, f in enumerate(files):
         name = f["name"]
         ext = Path(name).suffix.lower()
+        file_id = f["id"]
+        modified = f.get("modifiedTime", "")
+        if file_id in indexed and indexed[file_id] == modified:
+            skipped += 1
+            continue
         try:
-            fh = download_file(service, f["id"])
+            fh = download_file(service, file_id)
             if ext == ".docx":
                 text = extract_text_docx(fh)
             elif ext == ".pdf":
                 text = extract_text_pdf(fh)
             else:
                 continue
-
             if not text.strip():
                 continue
-
             chunks = chunk_text(text)
             for j, chunk in enumerate(chunks):
                 emb = embed_text(chunk)
                 if emb:
-                    collection.add(
-                        ids=[f"{f['id']}_{j}"],
+                    collection.upsert(
+                        ids=[f"{file_id}_{j}"],
                         embeddings=[emb],
                         documents=[chunk],
                         metadatas=[{"filename": name, "chunk": j}]
                     )
                     total_chunks += 1
                 time.sleep(0.05)
-
-            if (i + 1) % 10 == 0:
-                log.info(f"[{i+1}/{len(files)}] {total_chunks} chunks indexes")
+            indexed[file_id] = modified
+            new_files += 1
+            if new_files % 10 == 0:
+                with open(INDEXED_DB, "w") as fj:
+                    json.dump(indexed, fj)
+                log.info(f"[{i+1}/{len(files)}] {new_files} nouveaux, {skipped} ignores, {total_chunks} chunks")
         except Exception as e:
-            log.error(f"Erreur fichier {name}: {e}")
-
-    log.info(f"=== Termine! {total_chunks} chunks indexes dans ChromaDB ===")
+            log.error(f"Erreur {name}: {e}")
+    with open(INDEXED_DB, "w") as fj:
+        json.dump(indexed, fj)
+    log.info(f"=== Termine! {new_files} nouveaux, {skipped} ignores, {total_chunks} chunks ===")
 
 if __name__ == "__main__":
     main()
