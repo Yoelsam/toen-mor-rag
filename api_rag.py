@@ -23,7 +23,7 @@ client_gemini = genai.Client(api_key=GEMINI_API_KEY)
 
 embed_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="paraphrase-multilingual-MiniLM-L12-v2")
 client = chromadb.PersistentClient(path=CHROMA_DIR)
-collection = client.get_collection(COLLECTION_NAME, embedding_function=embed_fn)
+collection = client.get_collection(COLLECTION_NAME)
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -419,7 +419,7 @@ footer { background:var(--dark3); border-top:1px solid var(--border); padding:22
       &#x00A9; 2026 <a href="https://law-mor.com" target="_blank" class="footer-link">&#x05DE;&#x05E9;&#x05E8;&#x05D3; &#x05E2;&#x05D5;&quot;&#x05D3; &#x05D0;&#x05D4;&#x05D5;&#x05D3; &#x05E0;&#x05EA;&#x05DF; &#x05DE;&#x05D5;&#x05E8;</a><br>
       <a href="https://law-mor.com/%d7%a6%d7%95%d7%a8-%d7%a7%d7%a9%d7%a8/" target="_blank" class="footer-link">&#x05E6;&#x05D5;&#x05E8; &#x05E7;&#x05E9;&#x05E8;</a> | office@law-mor.com
     </div>
-    <div class="footer-tech" style="text-align:right;"><span style="color:var(--text-dim);font-size:0.7em;opacity:0.6;">v1.2.0 <div class="footer-tech"><a href="https://law-mor.com"bull; June 2026</span><br><a href="https://law-mor.com" target="_blank" class="footer-link">&#x05DC;&#x05D0;&#x05EA;&#x05E8; &#x05D4;&#x05DE;&#x05E9;&#x05E8;&#x05D3; &#x05E2;&#x05D5;&quot;&#x05D3; &#x05DE;&#x05D5;&#x05E8; &#x2190;</a></div>
+    <div class="footer-tech" style="text-align:right;"><span style="color:var(--text-dim);font-size:0.85em;opacity:0.8;">v1.2.0 <div class="footer-tech"><a href="https://law-mor.com"bull; June 2026</span><br><a href="https://law-mor.com" target="_blank" class="footer-link">&#x05DC;&#x05D0;&#x05EA;&#x05E8; &#x05D4;&#x05DE;&#x05E9;&#x05E8;&#x05D3; &#x05E2;&#x05D5;&quot;&#x05D3; &#x05DE;&#x05D5;&#x05E8; &#x2190;</a></div>
   </div>
 </footer>
 

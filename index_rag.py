@@ -84,14 +84,13 @@ def chunk_text(text, size=2000, overlap=200):
         start = end - overlap
     return chunks
 
+from sentence_transformers import SentenceTransformer
+_embed_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+
 def embed_text(text):
     try:
-        result = genai.embed_content(
-            model="models/gemini-embedding-001",
-            content=text[:8000],
-            task_type="retrieval_document"
-        )
-        return result["embedding"]
+        emb = _embed_model.encode(text[:8000])
+        return emb.tolist()
     except Exception as e:
         log.error(f"Erreur embedding: {e}")
         return None
