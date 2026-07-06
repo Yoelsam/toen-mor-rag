@@ -548,6 +548,7 @@ document.getElementById("new-chat-btn").addEventListener("click", function() {
 
 // ===== RESET RECHERCHE =====
 function resetSearch() {
+  chatHistory = []; resetConv(); updateChatIndicator();
   document.getElementById('query').value = '';
   var qu = document.getElementById('query-upload');
   if (qu) qu.value = '';
@@ -612,11 +613,13 @@ async function search() {
     document.getElementById('loading').style.display='none';
     if (data.error) { alert('שגיאה: '+data.error); return; }
     chatHistory.push({q: rawQuery, a: data.answer}); updateChatIndicator();
+    document.getElementById('query').value = '';
     var conv = document.getElementById('conversation'); if(!conv){alert("erreur: div conversation introuvable"); return;}
     conv.style.display='block';
     var turnDiv = document.createElement('div');
     turnDiv.style.cssText='margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:20px;';
-    var qDiv = '<div style="background:var(--dark2);border-right:3px solid var(--gold);padding:10px 14px;border-radius:8px;margin-bottom:12px;color:var(--text-dim);font-size:0.9em;">' + String.fromCharCode(10067) + ' ' + rawQuery.replace(/</g,"&lt;") + '</div>';
+    var qNum = chatHistory.length;
+    var qDiv = '<div style="background:var(--dark2);border-right:3px solid var(--gold);padding:10px 14px;border-radius:8px;margin-bottom:12px;color:var(--text-dim);font-size:0.9em;"><span style="color:var(--gold);font-weight:700;margin-left:8px;">שאלה '+qNum+':</span> ' + rawQuery.replace(/</g,"&lt;") + '</div>';
     var ansBody = linkSrc(data.answer).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>");
     var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
     var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><button class="btn-pdf" onclick="exportPDF()">ייצוא PDF</button></div>';
@@ -629,7 +632,7 @@ async function search() {
       turnDiv.appendChild(srcDiv);
     }
     conv.appendChild(turnDiv);
-    turnDiv.scrollIntoView({behavior:"smooth",block:"start"});
+    window.scrollTo({top:0,behavior:"smooth"});
   } catch(e) {
     document.getElementById('loading').style.display='none';
     alert('שגיאה: '+e.message);
