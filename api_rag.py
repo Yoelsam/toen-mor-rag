@@ -354,21 +354,20 @@ footer { background:var(--dark3); border-top:1px solid var(--border); padding:22
   </div>
   <div class="filters-pills" id="filters-pills"></div>
 </div>
-<div class="chat-history-indicator" id="chat-indicator">&#x1F4AC; &#x05E9;&#x05D9;&#x05D7;&#x05D4; &#x05E4;&#x05E2;&#x05D9;&#x05DC;&#x05D4; &mdash; <span id="chat-count">0</span> &#x05E9;&#x05D0;&#x05DC;&#x05D5;&#x05EA; &#x05D1;&#x05D4;&#x05E7;&#x05E9;&#x05E8; &mdash; &#x05DC;&#x05E9;&#x05D9;&#x05D7;&#x05D4; &#x05D7;&#x05D3;&#x05E9;&#x05D4; &#x05DC;&#x05D7;&#x05E5; &#x05E2;&#x05DC; &#x05D4;&#x05DB;&#x05E4;&#x05EA;&#x05D5;&#x05E8; &#x05D4;&#x05D9;&#x05E8;&#x05D5;&#x05E7;</div><textarea id="query" placeholder="&#x05D4;&#x05E7;&#x05DC;&#x05D3; &#x05D0;&#x05EA; &#x05E9;&#x05D0;&#x05DC;&#x05EA;&#x05DA; &#x05D4;&#x05DE;&#x05E9;&#x05E4;&#x05D8;&#x05D9;&#x05EA; &#x05DB;&#x05D0;&#x05DF;..."></textarea>
+<div class="chat-history-indicator" id="chat-indicator">&#x1F4AC; <span id="chat-count">0</span> &#x05E9;&#x05D0;&#x05DC;&#x05D5;&#x05EA; &#x05D1;&#x05D4;&#x05E7;&#x05E9;&#x05E8; &mdash; &#x05DC;&#x05E9;&#x05D0;&#x05DC;&#x05D4; &#x05D7;&#x05D3;&#x05E9;&#x05D4; &#x05DC;&#x05D7;&#x05E5; &#x05E2;&#x05DC; &#x05D4;&#x05DB;&#x05E4;&#x05EA;&#x05D5;&#x05E8; &#x05D4;&#x05D9;&#x05E8;&#x05D5;&#x05E7;</div><textarea id="query" placeholder="&#x05E9;&#x05D0;&#x05DC;&#x05D4; 1: &#x05D4;&#x05E7;&#x05DC;&#x05D3; &#x05D0;&#x05EA; &#x05E9;&#x05D0;&#x05DC;&#x05EA;&#x05DA; &#x05D4;&#x05DE;&#x05E9;&#x05E4;&#x05D8;&#x05D9;&#x05EA; &#x05DB;&#x05D0;&#x05DF;..."></textarea>
 <div class="upload-area" onclick="document.getElementById('file').click()">
 &#x1F4CE; &#x05D4;&#x05E2;&#x05DC;&#x05D4; &#x05DE;&#x05E1;&#x05DE;&#x05DA; (&#x05D0;&#x05D5;&#x05E4;&#x05E6;&#x05D9;&#x05D5;&#x05E0;&#x05DC;&#x05D9;) - <span id="filename">&#x05DC;&#x05D0; &#x05E0;&#x05D1;&#x05D7;&#x05E8; &#x05E7;&#x05D5;&#x05D1;&#x05E5;</span>
 <input type="file" id="file" style="display:none" accept=".docx,.pdf,.txt" multiple onchange="showFiles(this)">
 </div>
 <div id="filelist" style="margin-top:10px;"></div>
 <button class="btn" onclick="search()">&#x1F50D; &#x05D7;&#x05E4;&#x05E9; &#x05D1;&#x05DE;&#x05D0;&#x05D2;&#x05E8;</button>
-<button class="btn-help" id="help-btn">&#x1F4A1; &#x05DB;&#x05D9;&#x05E6;&#x05D3; &#x05DC;&#x05D7;&#x05E4;&#x05E9;?</button><button class="btn-new-chat" id="new-chat-btn">&#x1F4AC; &#x05E9;&#x05D9;&#x05D7;&#x05D4; &#x05D7;&#x05D3;&#x05E9;&#x05D4;</button><button class="btn-reset-search" id="reset-search-btn">&#x1F5D1;&#xFE0F; &#x05E0;&#x05E7;&#x05D4; &#x05D4;&#x05DB;&#x05DC;</button>
+<button class="btn-help" id="help-btn">&#x1F4A1; &#x05DB;&#x05D9;&#x05E6;&#x05D3; &#x05DC;&#x05D7;&#x05E4;&#x05E9;?</button><button class="btn-new-chat" id="new-chat-btn">&#x1F4AC; &#x05E9;&#x05D0;&#x05DC;&#x05EA; &#x05D4;&#x05DE;&#x05E9;&#x05DA;</button><button class="btn-reset-search" id="reset-search-btn">&#x1F5D1;&#xFE0F; &#x05E0;&#x05E7;&#x05D4; &#x05D4;&#x05DB;&#x05DC;</button>
 </div>
 <div class="loading" id="loading">
   <div class="spinner"></div>
   <p>&#x05DE;&#x05D7;&#x05E4;&#x05E9; &#x05D1;&#x05DE;&#x05D0;&#x05D2;&#x05E8; &#x05E4;&#x05E1;&#x05E7;&#x05D9; &#x05D4;&#x05D3;&#x05D9;&#x05DF;...</p>
 </div>
-<div class="answer" id="answer"></div>
-<div class="sources" id="sources"></div>
+<div id="conversation" style="display:none;margin-top:18px;"></div>
 </div>
 
 </div>
@@ -502,7 +501,7 @@ function updateFilterCount() {
   var cnt = document.getElementById('filters-count');
   if (activeFilters.length === 0) {
     cnt.innerHTML = '';
-  } else {
+  } else { var qa=document.getElementById("query"); if(qa){qa.placeholder="05E905D005DC05D4 1: 05D405E705DC05D3 05D005EA 05E905D005DC05EA05DA 05D405DE05E905E405D805D905EA 05DB05D005DF...";}
     cnt.innerHTML = activeFilters.length + ' נושאים נבחרו &middot; <button class="btn-clear" onclick="clearFilters()">נקה הכל</button>';
   }
 }
@@ -525,7 +524,7 @@ var _tb=document.getElementById('try-free-btn');if(_tb)_tb.addEventListener('cli
 
 
 // ===== HISTORIQUE CONVERSATION =====
-var chatHistory = [];
+var chatHistory = []; function resetConv(){var conv=document.getElementById("conversation");if(conv){conv.innerHTML="";conv.style.display="none";}var qa=document.getElementById("query");if(qa){qa.value="";qa.placeholder="שאלה 1: הקלד את שאלתך המשפטית כאן...";}}
 
 function updateChatIndicator() {
   var ind = document.getElementById("chat-indicator");
@@ -533,15 +532,18 @@ function updateChatIndicator() {
   if (chatHistory.length > 0) {
     ind.style.display = "block";
     cnt.textContent = chatHistory.length;
+    var qa = document.getElementById("query");
+    if(qa){ qa.placeholder = "שאלה " + (chatHistory.length+1) + ": הקלד את שאלתך המשפטית כאן..."; }
   } else {
+    var qa=document.getElementById("query"); if(qa){qa.placeholder="שאלה 1: הקלד את שאלתך המשפטית כאן...";}
     ind.style.display = "none";
   }
 }
 
 document.getElementById("new-chat-btn").addEventListener("click", function() {
-  chatHistory = [];
-  updateChatIndicator();
-  resetSearch();
+  var qa = document.getElementById("query");
+  if(qa){ qa.focus(); }
+  window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
 });
 
 // ===== RESET RECHERCHE =====
@@ -549,9 +551,9 @@ function resetSearch() {
   document.getElementById('query').value = '';
   var qu = document.getElementById('query-upload');
   if (qu) qu.value = '';
-  document.getElementById('answer').style.display = 'none';
-  document.getElementById('answer').innerHTML = '';
-  document.getElementById('sources').innerHTML = '';
+  
+  
+  
   document.getElementById('loading').style.display = 'none';
   var fn = document.getElementById('filename');
   if (fn) fn.textContent = 'לא נבחר קובץ';
@@ -591,8 +593,8 @@ async function search() {
   var fileList = selectedFiles;
   if (!rawQuery && !fileList.length) { alert('הקלד שאלה או העלה קובץ'); return; }
   document.getElementById('loading').style.display='block';
-  document.getElementById('answer').style.display='none';
-  document.getElementById('sources').innerHTML='';
+  
+  
   try {
     let resp;
     if (fileList.length) {
@@ -600,7 +602,7 @@ async function search() {
       for(var fi=0;fi<fileList.length;fi++){fd.append("files",fileList[fi]);}
       fd.append('query', query);
       resp = await fetch('/api/upload', {method:'POST', body:fd});
-    } else {
+    } else { var qa=document.getElementById("query"); if(qa){qa.placeholder="05E905D005DC05D4 1: 05D405E705DC05D3 05D005EA 05E905D005DC05EA05DA 05D405DE05E905E405D805D905EA 05DB05D005DF...";}
       const fd = new FormData();
       fd.append('query', query);
       fd.append('history', JSON.stringify(chatHistory));
@@ -609,18 +611,25 @@ async function search() {
     const data = await resp.json();
     document.getElementById('loading').style.display='none';
     if (data.error) { alert('שגיאה: '+data.error); return; }
-    const ans = document.getElementById('answer');
-    var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><button class="btn-pdf" onclick="exportPDF()">ייצוא PDF</button></div>';
-    var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
-    ans.innerHTML = hdr + '<div class="answer-body"></div>' + disc;
     chatHistory.push({q: rawQuery, a: data.answer}); updateChatIndicator();
-    ans.querySelector(".answer-body").innerHTML=linkSrc(data.answer).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>");
-    ans.style.display='block';
+    var conv = document.getElementById('conversation'); if(!conv){alert("erreur: div conversation introuvable"); return;}
+    conv.style.display='block';
+    var turnDiv = document.createElement('div');
+    turnDiv.style.cssText='margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:20px;';
+    var qDiv = '<div style="background:var(--dark2);border-right:3px solid var(--gold);padding:10px 14px;border-radius:8px;margin-bottom:12px;color:var(--text-dim);font-size:0.9em;">' + String.fromCharCode(10067) + ' ' + rawQuery.replace(/</g,"&lt;") + '</div>';
+    var ansBody = linkSrc(data.answer).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>");
+    var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
+    var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><button class="btn-pdf" onclick="exportPDF()">ייצוא PDF</button></div>';
+    turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc;
     if (data.sources) {
       let html='<div class="sources-title">מקורות:</div>';
       data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;html+='<div class="source-item" id="src-item-'+num+'" onclick="toggleSrc(this)" style="cursor:pointer;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+'<div class="src-ext" style="display:none;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:var(--dark2);padding:12px;border-radius:6px;direction:rtl;">'+ext+'</div></div>';});
-      document.getElementById('sources').innerHTML=html;
+      var srcDiv = document.createElement('div');
+      srcDiv.innerHTML = html;
+      turnDiv.appendChild(srcDiv);
     }
+    conv.appendChild(turnDiv);
+    turnDiv.scrollIntoView({behavior:"smooth",block:"start"});
   } catch(e) {
     document.getElementById('loading').style.display='none';
     alert('שגיאה: '+e.message);
