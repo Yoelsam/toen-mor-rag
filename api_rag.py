@@ -10,7 +10,6 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 import io
 from docx import Document
-import PyPDF2
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 CHROMA_DIR = "/home/rag/chroma_db"
@@ -140,8 +139,16 @@ async def upload(files: list[UploadFile] = File(...), query: str = Form("")):
                 txt = chr(10).join(p.text for p in doc.paragraphs)
             elif ext == ".pdf":
                 try:
+                    import PyPDF2
                     reader = PyPDF2.PdfReader(fh)
-                    txt = chr(10).join(p.extract_text() or "" for p in reader.pages)
+                    pages_txt = []
+                    for p in reader.pages:
+                        t = p.extract_text() or ""
+                        if t:
+                            heb = sum(1 for c in t if 0x05D0 <= ord(c) <= 0x05EA)
+                            if len(t) > 0 and heb / len(t) > 0.1:
+                                pages_txt.append(t)
+                    txt = chr(10).join(pages_txt)
                 except Exception as pdf_err:
                     txt = "[PDF illisible: "+str(pdf_err)[:80]+"]"
             else:

@@ -6,7 +6,7 @@ from googleapiclient.http import MediaIoBaseDownload
 import google.generativeai as genai
 import chromadb
 from docx import Document
-import PyPDF2
+import pdfplumber
 
 # CONFIG
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
@@ -69,8 +69,16 @@ def extract_text_docx(fh):
 
 def extract_text_pdf(fh):
     try:
+        import PyPDF2
         reader = PyPDF2.PdfReader(fh)
-        return "\n".join(page.extract_text() for page in reader.pages)
+        pages_text = []
+        for page in reader.pages:
+            t = page.extract_text() or ""
+            if t:
+                heb = sum(1 for c in t if 0x05D0 <= ord(c) <= 0x05EA)
+                if len(t) > 0 and heb / len(t) > 0.1:
+                    pages_text.append(t)
+        return "\n".join(pages_text)
     except Exception as e:
         log.error(f"Erreur pdf: {e}")
         return ""
