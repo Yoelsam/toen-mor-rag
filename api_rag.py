@@ -33,9 +33,22 @@ app.add_middleware(SessionMiddleware,secret_key=os.environ["SESSION_SECRET"],htt
 app.include_router(auth.router)
 database.init_db()
 
-def search_docs(query, n=5):
-    results = collection.query(query_texts=[query], n_results=n)
-    return results["documents"][0], results["metadatas"][0]
+def search_docs(query, n=10):
+    results = collection.query(query_texts=[query], n_results=30)
+    docs_all = results["documents"][0]
+    metas_all = results["metadatas"][0]
+    seen = set()
+    docs_dedup = []
+    metas_dedup = []
+    for d, m in zip(docs_all, metas_all):
+        fn = m.get("filename", "")
+        if fn not in seen:
+            seen.add(fn)
+            docs_dedup.append(d)
+            metas_dedup.append(m)
+        if len(docs_dedup) >= n:
+            break
+    return docs_dedup, metas_dedup
 
 def ask_gemini(query, docs, metas, history=None):
     context = "\n\n".join(f"[\u05DE\u05E7\u05D5\u05E8 {i+1}: {m['filename']}]\n{d}" for i,(d,m) in enumerate(zip(docs,metas)))
@@ -51,8 +64,10 @@ def ask_gemini(query, docs, metas, history=None):
 2. אם המקורות מכילים מידע רלוונטי חלקי - השתמש בו וציין זאת.
 3. אם המקורות אינם מכילים תשובה ישירה - ענה על בסיס עקרונות הלכתיים ומשפטיים כלליים הידועים לך, וציין במפורש שהתשובה מבוססת על ידע כללי ולא על פסיקה ספציפית מהמאגר.
 4. לעולם אל תאמר "אין תשובה" - תמיד ספק את המידע הטוב ביותר שיש לך.
-5. ציין תמיד את המקורות הרלוונטיים שמהם שאבת מידע.
-6. מבנה התשובה: עיקר הדין / ניתוח המקרה / המלצה מעשית.
+5. CRITICAL: בכל טענה ציין את מספר המקור בפורמט המדויק [מקור X] - X הוא המספר שמופיע לפני שם הקובץ במקורות למטה.
+6. דוגמה לתשובה נכונה: "הבעל חייב במזונות אשתו [מקור 1]. עם זאת, אם האישה מורדת, הוא פטור [מקור 3, מקור 4]."
+7. חובה להשתמש במקורות שונים - לא רק מקור אחד. בדוק כל מקור וציין אותו בנפרד.
+8. מבנה התשובה: עיקר הדין / ניתוח המקרה / המלצה מעשית.
 
 {history_text}
 
