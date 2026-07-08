@@ -383,7 +383,7 @@ footer { background:var(--dark3); border-top:1px solid var(--border); padding:22
 </div>
 <div id="filelist" style="margin-top:10px;"></div>
 <button class="btn" onclick="search()">&#x1F50D; &#x05D7;&#x05E4;&#x05E9; &#x05D1;&#x05DE;&#x05D0;&#x05D2;&#x05E8;</button>
-<button class="btn-help" id="help-btn">&#x1F4A1; &#x05DB;&#x05D9;&#x05E6;&#x05D3; &#x05DC;&#x05D7;&#x05E4;&#x05E9;?</button><button class="btn-new-chat" id="new-chat-btn">&#x1F4AC; &#x05E9;&#x05D0;&#x05DC;&#x05EA; &#x05D4;&#x05DE;&#x05E9;&#x05DA;</button><button class="btn-reset-search" id="reset-search-btn">&#x1F5D1;&#xFE0F; &#x05E0;&#x05E7;&#x05D4; &#x05D4;&#x05DB;&#x05DC;</button>
+<button class="btn-help" id="help-btn">&#x1F4A1; &#x05DB;&#x05D9;&#x05E6;&#x05D3; &#x05DC;&#x05D7;&#x05E4;&#x05E9;?</button><button class="btn-reset-search" id="reset-search-btn">&#x1F5D1;&#xFE0F; &#x05E0;&#x05E7;&#x05D4; &#x05D4;&#x05DB;&#x05DC;</button>
 </div>
 <div class="loading" id="loading">
   <div class="spinner"></div>
@@ -562,7 +562,7 @@ function updateChatIndicator() {
   }
 }
 
-document.getElementById("new-chat-btn").addEventListener("click", function() {
+if(document.getElementById("new-chat-btn")) document.getElementById("new-chat-btn").addEventListener("click", function() {
   var qa = document.getElementById("query");
   if(qa){ qa.focus(); }
   window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
@@ -607,6 +607,10 @@ document.querySelectorAll('.faq-q').forEach(function(q) {
 var selectedFiles=[];function showFiles(inp){var lbl=String.fromCharCode(1511,1489,1510,1497,1501);for(var j=0;j<inp.files.length;j++){if(selectedFiles.length<10){selectedFiles.push(inp.files[j]);}else{alert(String.fromCharCode(1504,1497,1514,1503,32,1506,1491,32,49,48,32)+lbl);break;}}inp.value="";renderFiles();}function renderFiles(){var box=document.getElementById("filelist");if(selectedFiles.length===0){box.innerHTML="";return;}var lbl=String.fromCharCode(1511,1489,1510,1497,1501);var h="<div style='color:var(--gold);font-weight:600;margin-bottom:6px;'>"+selectedFiles.length+" "+lbl+":</div>";for(var k=0;k<selectedFiles.length;k++){h+="<div style='background:var(--dark2);padding:6px 10px;border-radius:6px;margin-top:4px;font-size:0.85em;color:var(--text);display:flex;justify-content:space-between;align-items:center;'><span>"+selectedFiles[k].name+"</span><span onclick='removeFile("+k+")' style='cursor:pointer;color:#e74c3c;font-weight:bold;padding:0 8px;'>X</span></div>";}box.innerHTML=h;}function removeFile(i){selectedFiles.splice(i,1);renderFiles();}
 function toggleSrc(el){var p=el.querySelector(".src-ext");if(p)p.style.display=p.style.display==="none"?"block":"none";}
 function linkSrc(t){return t.replace(/\[\u05de\u05e7\u05d5\u05e8 (\d+)[^\]]*\]/g,function(m,n){return '<a href="#" onclick="jumpSrc('+n+');return false;" style="color:var(--gold);font-weight:700;text-decoration:none;border-bottom:1px dotted var(--gold);">'+m+'</a>';});} function jumpSrc(n){var items=document.querySelectorAll(".source-item");if(items.length>=n){var el=items[n-1];el.scrollIntoView({behavior:"smooth",block:"center"});var ext=el.querySelector(".src-ext");if(ext)ext.style.display="block";el.style.transition="background 0.3s";var orig=el.style.background;el.style.background="var(--gold-dim)";setTimeout(function(){el.style.background=orig;},1500);}}
+function scrollToQuery() {
+  var qa = document.getElementById('query');
+  if(qa){ qa.scrollIntoView({behavior:'smooth'}); qa.focus(); }
+}
 async function search() {
   var rawQuery = document.getElementById('query').value;
   var query = rawQuery;
@@ -645,10 +649,11 @@ async function search() {
     var ansBody = linkSrc(data.answer).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>");
     var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
     var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><button class="btn-pdf" onclick="exportPDF()">ייצוא PDF</button></div>';
-    turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc;
+    var suiteBtn = '<div style="margin-top:12px;"><button onclick="scrollToQuery()" style="background:linear-gradient(135deg,#1a5c3a,#0f3d26);border:1px solid #2ecc71;color:#2ecc71;padding:10px 16px;border-radius:8px;font-size:0.9em;cursor:pointer;">שאלה בהמשך ↓</button></div>';
+    turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc + suiteBtn;
     if (data.sources) {
       let html='<div class="sources-title">מקורות:</div>';
-      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;html+='<div class="source-item" id="src-item-'+num+'" onclick="toggleSrc(this)" style="cursor:pointer;"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+'<div class="src-ext" style="display:none;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:var(--dark2);padding:12px;border-radius:6px;direction:rtl;">'+ext+'</div></div>';});
+      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=ext&&heb>20;var driveLink='https://drive.google.com/drive/search?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="'+driveLink+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--gold);font-size:0.8em;margin-right:8px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;">פתח ב-Drive ↗</a>'+(showExt?'<div class="src-ext" style="display:none;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+'</div>';});
       var srcDiv = document.createElement('div');
       srcDiv.innerHTML = html;
       turnDiv.appendChild(srcDiv);
