@@ -33,20 +33,23 @@ app.include_router(auth.router)
 database.init_db()
 
 def search_docs(query, n=10):
-    results = collection.query(query_texts=[query], n_results=30)
+    results = collection.query(query_texts=[query], n_results=60)
     docs_all = results["documents"][0]
     metas_all = results["metadatas"][0]
     seen = set()
-    docs_dedup = []
-    metas_dedup = []
+    docx_list = []
+    pdf_list = []
     for d, m in zip(docs_all, metas_all):
         fn = m.get("filename", "")
         if fn not in seen:
             seen.add(fn)
-            docs_dedup.append(d)
-            metas_dedup.append(m)
-        if len(docs_dedup) >= n:
-            break
+            if fn.endswith(".docx"):
+                docx_list.append((d, m))
+            elif fn.endswith(".pdf"):
+                pdf_list.append((d, m))
+    mixed = docx_list[:7] + pdf_list[:3]
+    docs_dedup = [x[0] for x in mixed]
+    metas_dedup = [x[1] for x in mixed]
     return docs_dedup, metas_dedup
 
 def ask_gemini(query, docs, metas, history=None):
