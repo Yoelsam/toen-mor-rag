@@ -1,0 +1,24 @@
+{
+  "clients": {
+    "0559155960": {
+      "name": "אהוד נתן מור",
+      "folder_id": "103OibuM7bQSyX8SGQlBcuhnKEMjV9KE9",
+      "added": "2026-07-12T16:06:56.723490"
+    },
+    "0521234567": {
+      "name": "ישראל ישראלי",
+      "folder_id": "12k6OJBGY4wXhYsCjlP3Rm-qGycvoQ-lH",
+      "type": "client",
+      "added": "2026-07-12T16:30:20.949280"
+    },
+    "0541234567": {
+      "name": "test",
+      "folder_id": "1ZIQNSJaq3VAiG_fgAhH03t0a-ENC_e7g",
+      "type": "client",
+      "added": "2026-07-12T17:38:16.785105"
+    }
+  },
+  "folder_id": "1UYn1J6iPh5zauptQuepBvQjl0poZfmDc",
+  "clients_folder_id": "1Jf6dQG3vV_V7SnwWaWh_OLEmgOP-VA2s",
+  "groups_folder_id": "1dO_nargWhW-d_dYuqeKiuXefdI2TQ5JQ"
+}
