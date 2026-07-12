@@ -162,7 +162,7 @@ def main():
                         ids=[f"{file_id}_{j}"],
                         embeddings=[emb],
                         documents=[chunk],
-                        metadatas=[{"filename": name, "chunk": j}]
+                        metadatas=[{"filename": name, "chunk": j, "file_id": file_id}]
                     )
                     total_chunks += 1
                 time.sleep(0.05)

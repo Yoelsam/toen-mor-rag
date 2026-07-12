@@ -10,7 +10,15 @@ app = FastAPI()
 @app.post("/whatsapp-drive")
 async def receive_whatsapp(request: Request):
     try:
-        body = await request.json()
+        raw = await request.body()
+        try:
+            body = await request.json()
+        except:
+            import json as _json
+            body = _json.loads(raw.decode())
+        if isinstance(body, str):
+            import json as _json
+            body = _json.loads(body)
         value = body["entry"][0]["changes"][0]["value"]
         messages = value.get("messages", [])
         if not messages:
