@@ -245,7 +245,8 @@ body { background:var(--dark); color:var(--text); font-family:'Heebo',sans-serif
 .btn-help:hover { border-color:var(--gold); color:var(--gold); }
 .btn-pdf { background:transparent; border:1px solid var(--border); color:var(--text-dim); padding:7px 14px; border-radius:8px; font-family:'Heebo',sans-serif; font-size:0.83em; cursor:pointer; transition:all 0.2s; }
 .btn-pdf:hover { border-color:var(--gold); color:var(--gold); }
-.btn-draft { background:transparent; border:1px solid #3498db; color:#3498db; padding:7px 14px; border-radius:8px; font-family:'Heebo',sans-serif; font-size:0.83em; cursor:pointer; margin-right:8px; }
+.btn-draft { background:linear-gradient(135deg,#1a3a5c,#0f2d4a); border:1px solid #e67e22; color:#e67e22; padding:7px 14px; border-radius:8px; font-family:'Heebo',sans-serif; font-size:0.83em; cursor:pointer; margin-right:8px; animation:pulse-orange 1s infinite; }
+@keyframes pulse-orange { 0%{box-shadow:0 0 0 0 rgba(230,126,34,0.8);} 50%{box-shadow:0 0 0 10px rgba(230,126,34,0);} 100%{box-shadow:0 0 0 0 rgba(230,126,34,0);} }
 .btn-draft:hover { background:#3498db; color:#fff; }
 .upload-area { border:1.5px dashed #2a3545; border-radius:10px; padding:16px; text-align:center; margin-top:12px; cursor:pointer; color:var(--text-dim); font-size:0.9em; transition:all 0.2s; }
 .upload-area:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-dim); }
