@@ -165,9 +165,11 @@ def main():
                         metadatas=[{"filename": name, "chunk": j, "file_id": file_id}]
                     )
                     total_chunks += 1
-                time.sleep(0.05)
+                time.sleep(0.1)
             indexed[file_id] = modified
             new_files += 1
+            if new_files % 50 == 0:
+                import gc; gc.collect()
             if new_files % 10 == 0:
                 with open(INDEXED_DB, "w") as fj:
                     json.dump(indexed, fj)
