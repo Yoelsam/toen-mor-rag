@@ -390,7 +390,7 @@ footer { background:var(--dark3); border-top:1px solid var(--border); padding:22
 </div>
 <div id="filelist" style="margin-top:10px;"></div>
 <button class="btn" onclick="search()">&#x1F50D; &#x05D7;&#x05E4;&#x05E9; &#x05D1;&#x05DE;&#x05D0;&#x05D2;&#x05E8;</button>
-<button class="btn-help" id="help-btn">&#x1F4A1; &#x05DB;&#x05D9;&#x05E6;&#x05D3; &#x05DC;&#x05D7;&#x05E4;&#x05E9;?</button><button class="btn-reset-search" id="reset-search-btn">&#x1F5D1;&#xFE0F; &#x05E0;&#x05E7;&#x05D4; &#x05D4;&#x05DB;&#x05DC;</button>
+<button class="btn-help" id="help-btn">&#x1F4A1; &#x05DB;&#x05D9;&#x05E6;&#x05D3; &#x05DC;&#x05D7;&#x05E4;&#x05E9;?</button><button class="btn-reset-search" id="reset-search-btn">&#x1F5D1;&#xFE0F; &#x05E0;&#x05E7;&#x05D4; &#x05D4;&#x05DB;&#x05DC;</button><button class="btn-reset-search" onclick="summarizeSession()" style="border-color:#3498db;color:#3498db;">&#x1F4CB; &#x05E1;&#x05D9;&#x05DB;&#x05D5;&#x05DD; &#x05E9;&#x05D9;&#x05D7;&#x05D4;</button>
 </div>
 <div class="loading" id="loading">
   <div class="spinner"></div>
@@ -645,6 +645,22 @@ function downloadPdfDraft(el){
   var parent=el.parentElement;var txt=parent&&parent.previousElementSibling?parent.previousElementSibling.innerText:'';
   var w=window.open('');
   w.document.write('<html dir="rtl"><head><meta charset="utf-8"><style>body{font-family:Arial;padding:40px;direction:rtl;line-height:1.8;}@media print{button{display:none;}}</style></head><body><pre style="white-space:pre-wrap;font-family:Arial;">'+txt+'</pre><br><button onclick="window.print()">הדפס PDF</button></body></html>');
+  w.document.close();
+}
+function summarizeSession() {
+  var turns = document.querySelectorAll('#conversation > div');
+  if (!turns || turns.length === 0) { alert('אין שיחה לסיכום'); return; }
+  var html = '<html dir="rtl"><head><meta charset="utf-8"><style>body{font-family:Arial;padding:40px;direction:rtl;line-height:1.8;}h1{color:#333;border-bottom:2px solid #gold;}.question{background:#f5f5f5;padding:10px;border-right:3px solid #e67e22;margin:10px 0;border-radius:4px;}.answer{padding:10px;margin:10px 0;}@media print{button{display:none;}}</style></head><body>';
+  html += '<h1>סיכום שיחה - ' + new Date().toLocaleDateString("he-IL") + '</h1>';
+  turns.forEach(function(turn, i) {
+    var qEl = turn.querySelector("div[style*='border-right:3px solid var(--gold)']");
+    var aEl = turn.querySelector(".answer-body");
+    if (qEl) html += "<div class='question'>" + qEl.innerText + "</div>";
+    if (aEl) html += "<div class='answer'>" + aEl.innerText + "</div><hr>";
+  });
+  html += '<br><button onclick="window.print()">הדפס / שמור כ-PDF</button></body></html>';
+  var w = window.open('');
+  w.document.write(html);
   w.document.close();
 }
 function scrollToQuery() {
