@@ -245,6 +245,8 @@ body { background:var(--dark); color:var(--text); font-family:'Heebo',sans-serif
 .btn-help:hover { border-color:var(--gold); color:var(--gold); }
 .btn-pdf { background:transparent; border:1px solid var(--border); color:var(--text-dim); padding:7px 14px; border-radius:8px; font-family:'Heebo',sans-serif; font-size:0.83em; cursor:pointer; transition:all 0.2s; }
 .btn-pdf:hover { border-color:var(--gold); color:var(--gold); }
+.btn-draft { background:transparent; border:1px solid #3498db; color:#3498db; padding:7px 14px; border-radius:8px; font-family:'Heebo',sans-serif; font-size:0.83em; cursor:pointer; margin-right:8px; }
+.btn-draft:hover { background:#3498db; color:#fff; }
 .upload-area { border:1.5px dashed #2a3545; border-radius:10px; padding:16px; text-align:center; margin-top:12px; cursor:pointer; color:var(--text-dim); font-size:0.9em; transition:all 0.2s; }
 .upload-area:hover { border-color:var(--gold); color:var(--gold); background:var(--gold-dim); }
 .answer { background:var(--dark3); border:1px solid var(--border); border-radius:16px; padding:24px; margin-top:18px; display:none; }
@@ -478,6 +480,25 @@ document.getElementById('stat2').addEventListener('click', function() { openModa
 document.getElementById('stat3').addEventListener('click', function() { openModal(modalTexts.stat3[0], modalTexts.stat3[1]); });
 document.getElementById('help-btn').addEventListener('click', function() { openModal(modalTexts.help[0], modalTexts.help[1]); });
 
+async function generateDraft(btn) {
+  var turnDiv = btn.closest ? btn.closest('.answer-body') : null;
+  if (!turnDiv) turnDiv = btn.parentElement.parentElement;
+  var answerBody = turnDiv.querySelector ? turnDiv.querySelector('.answer-body') : turnDiv;
+  var answerText = answerBody ? answerBody.innerText : '';
+  var origText = btn.textContent;
+  btn.textContent = 'יוצר...';
+  btn.disabled = true;
+  try {
+    var resp = await fetch('/api/draft', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({answer: answerText, query: ''})});
+    var data = await resp.json();
+    var d = document.createElement('div');
+    d.style.cssText = 'margin-top:14px;background:var(--dark2);border:1px solid #3498db;border-radius:8px;padding:14px;direction:rtl;';
+    d.innerHTML = '<div style="color:#3498db;font-weight:700;margin-bottom:8px;">טיוטה משפטית</div><div style="white-space:pre-wrap;line-height:1.8;">'+(data.draft||'')+'</div>';
+    turnDiv.parentElement ? turnDiv.parentElement.appendChild(d) : document.getElementById('conversation').appendChild(d);
+    btn.textContent = 'נוצר';
+  } catch(e) { btn.textContent = 'שגיאה'; }
+  btn.disabled = false;
+}
 function exportPDF() {
   var bodyEl = document.querySelector('.answer-body');
   var answerText = bodyEl ? bodyEl.innerText : '';
@@ -653,7 +674,9 @@ async function search() {
     var ansBody = linkSrc(data.answer).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>");
     var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
     var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><button class="btn-pdf" onclick="exportPDF()">ייצוא PDF</button></div>';
+    var draftBtnHtml = '<button class="btn-draft" onclick="generateDraft(this)">צור טיוטה</button>';
     var suiteBtn = '<div style="margin-top:12px;"><button onclick="scrollToQuery()" style="background:linear-gradient(135deg,#1a5c3a,#0f3d26);border:1px solid #2ecc71;color:#2ecc71;padding:10px 16px;border-radius:8px;font-size:0.9em;cursor:pointer;">שאלה בהמשך ↓</button></div>';
+    hdr = hdr.replace('</div>', draftBtnHtml + '</div>');
     turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc + suiteBtn;
     if (data.sources) {
       let html='<div class="sources-title">מקורות:</div>';
@@ -685,6 +708,21 @@ applyTheme(localStorage.getItem('toenmor_theme')||'dark');
 </script>
 </body>
 </html>'''
+@app.post("/api/draft")
+async def create_draft(request: Request):
+    try:
+        data = await request.json()
+        answer = data.get("answer", "")
+        query = data.get("query", "")
+        prompt = f"""אתה עוזר משפטי מומחה. צור טיוטה משפטית מקצועית בעברית על בסיס הניתוח הבא.
+שאלת הלקוח: {query}
+ניתוח משפטי: {answer[:3000]}
+צור טיוטה משפטית מקצועית עם: כותרת, פתיחה, עיקר הטענות, סיכום ובקשה מבית הדין."""
+        draft = client_gemini.models.generate_content(model="gemini-2.5-flash", contents=prompt).text
+        return JSONResponse({"draft": draft})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 @app.get("/history")
 async def history(request: Request):
     user = auth.get_current_user(request)
