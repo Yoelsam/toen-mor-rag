@@ -30,11 +30,20 @@ async def receive_whatsapp(request: Request):
         name = contacts[0]["profile"]["name"] if contacts else "לקוח"
         
         from whatsapp_drive import save_message_to_drive
+        import base64
         if msg_type == "text":
-            save_message_to_drive(phone, name, "text", msg["text"]["body"])
+            text_body = msg.get("text", {}).get("body", "") if isinstance(msg.get("text"), dict) else str(msg.get("text", ""))
+            save_message_to_drive(phone, name, "text", text_body)
         else:
             filename = msg.get(msg_type, {}).get("filename", f"{msg_type}.bin")
             save_message_to_drive(phone, name, msg_type, b"", filename)
+        
+        # Gestion media depuis whatsapp-web.js
+        media = body.get("media")
+        if media:
+            media_data = base64.b64decode(media["data"])
+            media_filename = media.get("filename", "fichier")
+            save_message_to_drive(phone, name, "document", media_data, media_filename)
         
         return JSONResponse({"status": "ok", "client": name, "type": msg_type})
     except Exception as e:
