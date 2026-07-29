@@ -6,3 +6,5 @@ rag.env
 chroma_db/
 *.key
 *.pem
+chroma_db*
+*.bak*
