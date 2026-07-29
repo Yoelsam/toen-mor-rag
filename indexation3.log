@@ -1,0 +1,689 @@
+nohup: ignoring input
+/home/rag/index_rag.py:6: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-07-29 08:53:14,088 [INFO] No device provided, using cpu
+2026-07-29 08:53:14,331 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/modules.json "HTTP/1.1 307 Temporary Redirect"
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-07-29 08:53:14,331 [WARNING] Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-07-29 08:53:14,337 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/modules.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:14,448 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/config_sentence_transformers.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:14,454 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/config_sentence_transformers.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:14,456 [INFO] Loading SentenceTransformer model from sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2.
+2026-07-29 08:53:14,562 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/config_sentence_transformers.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:14,568 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/config_sentence_transformers.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:14,677 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:14,683 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/README.md "HTTP/1.1 200 OK"
+2026-07-29 08:53:14,793 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/modules.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:14,799 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/modules.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:14,916 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/sentence_bert_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:14,924 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/sentence_bert_config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:15,036 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/adapter_config.json "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:15,144 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:15,150 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 37915.26it/s]
+2026-07-29 08:53:15,604 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:15,712 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:15,819 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/video_preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:15,927 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:16,035 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:16,041 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:16,148 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:16,154 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:16,266 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:16,272 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:16,382 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:16,388 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:16,494 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:16,500 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:16,610 [INFO] HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:16,722 [INFO] HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-07-29 08:53:31,180 [INFO] HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 "HTTP/1.1 200 OK"
+2026-07-29 08:53:31,534 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/1_Pooling/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:31,540 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/1_Pooling%2Fconfig.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:31,649 [INFO] HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 "HTTP/1.1 200 OK"
+2026-07-29 08:53:31,655 [INFO] Connexion Google Drive...
+2026-07-29 08:53:31,812 [INFO] file_cache is only supported with oauth2client<4.0.0
+2026-07-29 08:53:32,217 [INFO] Liste des fichiers...
+2026-07-29 08:53:43,691 [INFO] 3539 fichiers trouves
+2026-07-29 08:53:43,979 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/modules.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:43,986 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/modules.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:44,097 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/config_sentence_transformers.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:44,103 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/config_sentence_transformers.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:44,104 [INFO] Loading SentenceTransformer model from sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2.
+2026-07-29 08:53:44,212 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/config_sentence_transformers.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:44,218 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/config_sentence_transformers.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:44,323 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:44,328 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/README.md "HTTP/1.1 200 OK"
+2026-07-29 08:53:44,438 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/modules.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:44,444 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/modules.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:44,552 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/sentence_bert_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:44,559 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/sentence_bert_config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:44,670 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/adapter_config.json "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:44,777 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:44,782 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 10687.29it/s]
+2026-07-29 08:53:44,965 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:45,075 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:45,184 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/video_preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:45,294 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:45,403 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:45,410 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:45,519 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:45,524 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:45,634 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:45,640 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:45,747 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:45,752 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:45,862 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:45,869 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:45,980 [INFO] HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+2026-07-29 08:53:46,095 [INFO] HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+2026-07-29 08:53:52,082 [INFO] HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 "HTTP/1.1 200 OK"
+2026-07-29 08:53:52,540 [INFO] HTTP Request: HEAD https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/resolve/main/1_Pooling/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-29 08:53:52,545 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/e8f8c211226b894fcb81acc59f3b34ba3efd5f42/1_Pooling%2Fconfig.json "HTTP/1.1 200 OK"
+2026-07-29 08:53:52,654 [INFO] HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 "HTTP/1.1 200 OK"
+2026-07-29 08:54:19,397 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:20,268 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:21,193 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:22,066 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:23,036 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912520>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:23,830 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:24,631 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:25,691 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4f296c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:26,747 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913240>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:27,564 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:28,505 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea6717c40>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:29,686 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea6701440>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:30,481 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:31,193 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:32,001 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:32,895 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:33,755 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77ae9ee23dd0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:34,698 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:35,604 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:36,600 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:37,357 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:38,232 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912750>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:38,963 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912660>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:39,929 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:40,844 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:41,593 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:42,714 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:43,701 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913e20>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:44,458 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:45,218 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:46,038 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913ba0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:46,902 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c49a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:47,724 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77ae9eecb2e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:48,726 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:50,260 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77ae9ee23dd0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:51,104 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913b00>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:52,051 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:52,954 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912660>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:53,780 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913d30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:54,552 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4911da0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:55,409 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:54:56,263 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912520>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:57,168 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49127a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:57,937 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913560>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:54:58,772 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912b10>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:00,229 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912200>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:01,153 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:01,889 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912cf0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:02,649 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49125c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:03,575 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4911e90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:04,265 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:05,298 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4911e90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:06,124 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5080>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:07,021 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c4180>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:07,908 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c48b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:08,756 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c4ea0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:09,442 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:10,623 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5170>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:11,400 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ca0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:12,187 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:12,994 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912430>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:13,815 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913510>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:14,596 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49125c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:15,495 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913d30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:16,468 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913240>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:17,309 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912700>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:18,267 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49126b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:19,106 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913f10>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:20,002 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:20,845 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912980>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:21,776 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913d80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:22,519 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49127a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:23,511 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912700>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:24,460 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912e30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:25,983 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913510>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:26,885 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912e30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:27,795 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913ab0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:28,615 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5670>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:29,397 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49137e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:30,304 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:31,127 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49130b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:32,169 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c50d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:33,203 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913ab0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:34,203 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913d30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:35,167 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:36,033 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:36,900 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913600>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:37,845 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913150>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:38,701 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ac0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:39,700 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49125c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:40,902 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:41,691 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913dd0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:42,618 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912980>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:43,434 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913560>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:44,441 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913b50>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:45,455 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912930>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:46,367 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:47,202 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:48,073 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913560>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:49,305 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912700>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:50,054 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:51,021 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:51,975 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea6867a10>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:52,941 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913e70>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:54,309 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:55,552 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:55:56,494 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c46d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:57,355 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912980>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:58,307 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4911f30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:55:59,399 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:56:00,384 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913dd0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:56:01,302 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:02,124 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913790>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:56:02,963 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913a60>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:56:03,900 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912980>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:56:04,798 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49138d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:56:05,724 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:07,088 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:07,875 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:08,682 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:09,543 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:10,431 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:11,344 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:12,161 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:13,076 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:13,848 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:14,632 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:15,464 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:16,136 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:16,944 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:17,808 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:18,500 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:19,222 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:20,197 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:21,071 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:22,120 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:22,915 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:23,863 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:24,736 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:25,448 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:26,467 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:27,257 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:28,153 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:28,809 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:29,846 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:30,740 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:31,546 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:32,204 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:33,043 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:33,847 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:34,620 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:35,447 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:36,496 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:37,556 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:38,378 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:39,454 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:40,144 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:40,980 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:41,921 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:42,669 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ca0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:56:43,649 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:44,616 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:45,338 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:46,243 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:46,980 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:47,770 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:48,552 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:49,334 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912610>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:56:50,125 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:50,860 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:51,696 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:52,519 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:53,536 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:54,514 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:55,160 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:56,061 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:56,938 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:58,040 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:58,964 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:56:59,778 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:00,435 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:01,511 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:02,391 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:03,171 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:03,950 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:04,904 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:05,767 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:06,531 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:07,504 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:08,542 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:09,321 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:10,358 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49129d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:57:11,258 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:12,208 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:13,012 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49129d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:57:13,804 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:14,526 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:15,525 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:16,583 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:17,495 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:18,219 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:19,208 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ed0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:57:20,507 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c50d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:57:21,506 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:22,406 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:23,318 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:24,109 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:24,854 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:25,671 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:57:26,597 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:27,631 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:28,446 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:29,335 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:30,183 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49128e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:57:31,021 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:32,712 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:33,589 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:34,377 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:35,380 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:36,165 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:37,006 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913740>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:57:37,952 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:39,007 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:39,793 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:40,509 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:41,366 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:42,329 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:43,101 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:43,999 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49125c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:57:44,938 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:45,864 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:46,644 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:47,480 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:49,179 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:50,082 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:50,920 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:51,814 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:52,684 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:53,516 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:54,377 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:55,137 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:55,944 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:56,813 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:57,611 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:58,519 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:57:59,530 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913510>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:00,538 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:01,747 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:02,602 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:03,632 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:04,491 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:05,373 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:06,374 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:07,306 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:08,228 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:09,006 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:09,756 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913560>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:10,862 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49135b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:11,702 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:12,467 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49131a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:13,420 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:14,256 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:14,940 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:15,745 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:16,688 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:17,547 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:18,415 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:19,247 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:20,211 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49127f0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:21,128 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:22,051 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:23,376 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:24,117 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:24,949 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:25,987 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:26,971 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:27,631 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:28,629 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:29,614 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:30,402 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912de0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:31,481 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:32,821 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49126b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:34,210 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:34,952 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:35,913 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:37,007 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913b00>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:37,784 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49124d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:38,475 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49122a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:39,359 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:40,250 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49131a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:41,255 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:41,931 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:42,905 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:43,855 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:44,608 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:45,463 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:46,357 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:47,213 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:48,134 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:49,022 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:49,850 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:50,770 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49122a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:51,680 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6520>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:53,039 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:53,877 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:54,848 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6c50>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:58:56,080 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:57,094 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:58,160 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:58,909 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:58:59,799 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:00,711 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:01,651 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912610>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:02,966 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:04,518 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912750>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:05,221 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:06,082 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:06,848 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:08,339 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:09,669 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:10,488 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:11,472 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:12,884 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913ab0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:13,967 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:14,744 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:15,591 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5440>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:16,608 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c70b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:17,533 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:18,375 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:19,135 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:19,955 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:20,854 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:21,559 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913dd0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:22,490 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913b00>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:23,532 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:24,441 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49131a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:25,807 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:26,655 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:27,538 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49131a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:28,545 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:29,399 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913240>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:30,740 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:31,592 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49131a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:32,462 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:33,476 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913b00>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:34,299 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 08:59:35,294 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49138d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:36,092 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913b00>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:37,048 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6fc0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:37,897 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49138d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:38,848 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5bc0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:39,663 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913b00>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:40,640 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6520>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:41,569 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49138d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:43,095 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7c40>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:44,157 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913240>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:45,105 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913510>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:46,037 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ac0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:47,154 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913830>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:48,037 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912930>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:49,431 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49129d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:50,634 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49124d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:51,408 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912de0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:52,306 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49131a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:53,362 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49125c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:54,758 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49121b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:55,461 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49128e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:56,406 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49127a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:57,389 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49138d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:58,338 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ac0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:58,991 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912070>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 08:59:59,907 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912f70>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:00,664 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:01,414 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913740>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:02,265 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913830>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:03,340 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912340>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:04,844 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49129d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:05,708 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49127a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:06,750 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49124d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:07,552 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6d90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:08,399 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c4540>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:09,535 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c62f0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:10,382 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7600>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:11,268 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c56c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:12,042 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 09:00:12,985 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c4540>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:14,207 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7100>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:15,040 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6390>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:15,965 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c4a90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:17,447 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c65c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:19,245 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7470>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:19,976 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6890>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:20,842 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5d50>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:21,764 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7970>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:22,722 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c62a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:24,071 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c51c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:25,143 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6cf0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:26,717 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6f70>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:50,880 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7600>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:52,003 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6c00>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:52,877 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c74c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:53,742 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c63e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:54,649 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c51c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:55,506 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912930>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:56,360 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:57,296 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49121b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:58,316 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912700>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:00:59,066 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49135b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:00,086 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49124d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:00,946 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912e30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:02,032 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49138d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:03,018 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49125c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:04,068 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913ab0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:05,055 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912070>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:05,897 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912390>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:07,258 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49114e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:08,142 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49127a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:09,221 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912340>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:09,945 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912bb0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:10,984 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49131a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:11,944 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:13,103 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49129d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:14,242 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912700>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:15,433 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912070>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:16,275 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49124d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:17,374 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49121b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:18,125 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913d80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:19,046 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6430>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:19,808 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7240>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:20,817 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6e80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:21,706 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c62f0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:23,160 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c67f0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:24,114 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6840>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:25,214 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7ba0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:26,438 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7560>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:27,306 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c4590>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:28,058 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5170>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:29,047 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5df0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:29,999 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5b20>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:30,999 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6d90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:31,778 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c75b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:32,583 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7240>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:33,509 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5d50>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:34,312 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7600>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:35,743 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c51c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:36,659 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c76f0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:38,016 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c53a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:38,989 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49128e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:39,838 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7380>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:40,756 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912980>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:41,885 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c46d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:42,828 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c4680>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:43,752 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7a60>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:45,116 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6c00>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:46,022 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7380>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:46,909 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c62f0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:47,741 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c51c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:48,596 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c46d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:49,549 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5bc0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:50,462 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5fd0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:51,352 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6520>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:52,204 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c53a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:52,885 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c71a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:54,115 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6840>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:54,934 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7420>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:55,745 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5f80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:56,618 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7240>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:57,571 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7bf0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:58,315 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7560>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:01:59,238 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6ed0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:00,078 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6520>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:00,802 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c50d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:01,607 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912980>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:02,334 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6430>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:03,320 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7600>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:04,348 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912340>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:06,090 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912bb0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:06,993 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ca0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:08,117 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912750>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:08,977 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49127a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:09,801 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49114e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:10,637 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49124d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:11,501 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ac0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:12,441 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49128e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:13,171 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912e30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:14,247 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:15,251 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913d80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:16,087 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ca0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:25,723 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912f70>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:26,637 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912070>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:27,555 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912e80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:28,402 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912390>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:29,343 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912bb0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:30,202 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49131a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:31,122 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912750>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:31,984 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:32,837 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49127a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:33,891 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49128e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:34,742 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ac0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:35,806 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c62a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:36,536 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7ce0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:37,362 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7d30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:38,307 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c75b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:39,225 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c4040>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:40,189 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6cf0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:41,167 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7100>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:42,057 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6750>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:43,157 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c54e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:44,177 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7790>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:45,165 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7740>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:46,009 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7dd0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:46,940 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7b00>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:48,444 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7240>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:49,413 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6ac0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:50,358 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7970>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:51,236 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c67f0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:52,086 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6160>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:53,359 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7ba0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:54,118 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7790>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:54,990 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6cf0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:55,909 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7ce0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:56,673 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7420>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:57,594 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5ad0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:58,456 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913830>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:02:59,413 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912750>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:00,243 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ca0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:01,003 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49138d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:01,896 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912610>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:02,974 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49121b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:03,775 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:04,833 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49129d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:05,730 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912390>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:06,485 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49135b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:07,509 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912070>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:08,406 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912b60>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:09,351 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912de0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:10,464 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913dd0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:11,509 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913f60>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:12,339 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912700>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:13,179 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49127a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:14,125 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912750>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:15,141 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912610>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:15,906 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49138d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:17,007 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912e80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:17,864 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49124d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:18,863 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49131a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:19,776 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49135b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:20,680 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c4ae0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:21,620 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c77e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:22,458 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6390>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:23,466 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7d30>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:24,277 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6930>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:25,254 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6de0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:26,156 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6d90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:26,981 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c73d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:27,774 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c5d50>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:28,646 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c46d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:29,616 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c4680>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:30,660 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c47c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:31,494 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c62a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:32,271 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c71a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:33,175 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6c00>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:34,138 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6160>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:35,314 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7420>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:36,718 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6cf0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:37,515 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912b60>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:38,475 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c73d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:39,553 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49134c0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:40,464 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c7a60>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:41,204 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912f70>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:42,032 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c6cf0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:43,045 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912ac0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:43,925 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49129d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:44,842 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49135b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:45,923 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912b60>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:47,518 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912700>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:48,457 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913c90>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:49,321 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49138d0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:50,199 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913d80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:51,325 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 09:03:52,188 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 09:03:52,999 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913d80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:54,015 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 09:03:54,963 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49135b0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:55,776 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912340>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:56,700 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912750>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:57,873 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913d80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:03:58,709 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 09:03:59,721 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 09:04:00,759 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4913d80>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:04:01,678 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 09:04:02,640 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea49128e0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:04:03,452 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea4912340>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:04:04,344 [ERROR] Erreur docx: file '<_io.BytesIO object at 0x77aea47c53a0>' is not a Word file, content type is 'application/vnd.openxmlformats-officedocument.themeManager+xml'
+2026-07-29 09:04:05,256 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 09:04:06,420 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 09:04:07,433 [ERROR] Erreur docx: File is not a zip file
+2026-07-29 09:04:08,380 [ERROR] Erreur docx: File is not a zip file

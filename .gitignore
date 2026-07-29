@@ -1,0 +1,8 @@
+*.pyc
+__pycache__/
+.env
+rag.env
+*.db
+chroma_db/
+*.key
+*.pem

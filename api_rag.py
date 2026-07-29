@@ -69,8 +69,10 @@ def ask_gemini(query, docs, metas, history=None):
 5. CRITICAL: בכל טענה ציין את מספר המקור בפורמט המדויק [מקור X]
 0. אסור בהחלט ליצור קישורים לאינטרנט, לגוגל דרייב, או כל URL אחר בתשובה. - X הוא המספר שמופיע לפני שם הקובץ במקורות למטה.
 6. דוגמה לתשובה נכונה: "הבעל חייב במזונות אשתו [מקור 1]. עם זאת, אם האישה מורדת, הוא פטור [מקור 3, מקור 4]."
+   CRITICAL: כתוב תמיד [מקור X] עם סוגריים מרובעות בלבד, לעולם לא [[מקור X]] עם סוגריים כפולות.
 7. חובה להשתמש במקורות שונים - לא רק מקור אחד. בדוק כל מקור וציין אותו בנפרד.
 8. מבנה התשובה: עיקר הדין / ניתוח המקרה / המלצה מעשית.
+9. CRITICAL: חובה לפתוח כל תשובה בשורה זו בדיוק: **תמצית:** [משפט אחד קצר המסכם את עיקר התשובה]. אחר כך עיקר הדין.
 
 {history_text}
 
@@ -119,7 +121,7 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
         seen=set();sources=[]
         for d,m in zip(docs,metas):
             if m["filename"] not in seen:
-                seen.add(m["filename"]);sources.append({"filename":m["filename"],"extrait":d[:3000],"file_id":m.get("file_id","")})
+                seen.add(m["filename"]);sources.append({"filename":m["filename"],"extrait":d[:400],"file_id":m.get("file_id","")})
         try:
             user = auth.get_current_user(request)
             if user and user.get("allowed"):
@@ -631,7 +633,7 @@ document.querySelectorAll('.faq-q').forEach(function(q) {
 });
 
 var selectedFiles=[];function showFiles(inp){var lbl=String.fromCharCode(1511,1489,1510,1497,1501);for(var j=0;j<inp.files.length;j++){if(selectedFiles.length<10){selectedFiles.push(inp.files[j]);}else{alert(String.fromCharCode(1504,1497,1514,1503,32,1506,1491,32,49,48,32)+lbl);break;}}inp.value="";renderFiles();}function renderFiles(){var box=document.getElementById("filelist");if(selectedFiles.length===0){box.innerHTML="";return;}var lbl=String.fromCharCode(1511,1489,1510,1497,1501);var h="<div style='color:var(--gold);font-weight:600;margin-bottom:6px;'>"+selectedFiles.length+" "+lbl+":</div>";for(var k=0;k<selectedFiles.length;k++){h+="<div style='background:var(--dark2);padding:6px 10px;border-radius:6px;margin-top:4px;font-size:0.85em;color:var(--text);display:flex;justify-content:space-between;align-items:center;'><span>"+selectedFiles[k].name+"</span><span onclick='removeFile("+k+")' style='cursor:pointer;color:#e74c3c;font-weight:bold;padding:0 8px;'>X</span></div>";}box.innerHTML=h;}function removeFile(i){selectedFiles.splice(i,1);renderFiles();}
-function toggleSrc(el){var p=el.querySelector(".src-ext");if(p)p.style.display=p.style.display==="none"?"block":"none";}
+function toggleSrc(el){var p=el.querySelector(".src-ext");if(!p)return;var opening=p.style.display==="none";p.style.display=opening?"block":"none";if(opening&&window._lastQuery&&!p.dataset.highlighted){var q=window._lastQuery.replace(/[^א-תa-zA-Z0-9\s]/g,"");var words=q.split(/\s+/).filter(function(w){return w.length>2;});var h=p.innerHTML;words.forEach(function(w){var root=w.length>3?w.substring(0,3):w;var re=new RegExp("("+root+"[א-ת]*)","g");h=h.replace(re,"<mark style='background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;'>$1</mark>");});p.innerHTML=h;p.dataset.highlighted="1";}}
 function linkSrc(t){return t.replace(/\[\u05de\u05e7\u05d5\u05e8 (\d+)[^\]]*\]/g,function(m,n){return '<a href="#" onclick="jumpSrc('+n+');return false;" style="color:var(--gold);font-weight:700;text-decoration:none;border-bottom:1px dotted var(--gold);">'+m+'</a>';});} function jumpSrc(n){var items=document.querySelectorAll(".source-item");if(items.length>=n){var el=items[n-1];el.scrollIntoView({behavior:"smooth",block:"center"});var ext=el.querySelector(".src-ext");if(ext)ext.style.display="block";el.style.transition="background 0.3s";var orig=el.style.background;el.style.background="var(--gold-dim)";setTimeout(function(){el.style.background=orig;},1500);}}
 function downloadWord(el){
   var txt=el.previousElementSibling?el.previousElementSibling.innerText:'';
@@ -668,7 +670,7 @@ function scrollToQuery() {
   if(qa){ qa.scrollIntoView({behavior:'smooth'}); qa.focus(); }
 }
 async function search() {
-  var rawQuery = document.getElementById('query').value;
+  var rawQuery = document.getElementById('query').value;window._lastQuery=rawQuery;
   var query = rawQuery;
   if (activeFilters.length > 0) {
     query = '[' + activeFilters.join(', ') + '] ' + rawQuery;
@@ -702,7 +704,7 @@ async function search() {
     turnDiv.style.cssText='margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:20px;';
     var qNum = chatHistory.length;
     var qDiv = '<div style="background:var(--dark2);border-right:3px solid var(--gold);padding:10px 14px;border-radius:8px;margin-bottom:12px;color:var(--text-dim);font-size:0.9em;"><span style="color:var(--gold);font-weight:700;margin-left:8px;">שאלה '+qNum+':</span> ' + rawQuery.replace(/</g,"&lt;") + '</div>';
-    var ansBody = linkSrc(data.answer).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>");
+    var ansBody = linkSrc(data.answer).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>").replace(/<strong>תמצית:<\/strong>/g,"<span style='background:#ffd500;color:#0a0e14;border-radius:4px;padding:2px 8px;font-weight:700;margin-left:6px;'>📋 תמצית</span>");
     var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
     var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><button class="btn-pdf" onclick="exportPDF()">ייצוא PDF</button></div>';
     var draftBtnHtml = '<button class="btn-draft" onclick="generateDraft(this)">צור טיוטה</button>';
@@ -711,7 +713,7 @@ async function search() {
     turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc + suiteBtn;
     if (data.sources) {
       let html='<div class="sources-title">מקורות:</div>';
-      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=ext&&heb>20;var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="'+driveLink+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--gold);font-size:0.8em;margin-right:8px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;">פתח ב-Drive ↗</a>'+(showExt?'<div class="src-ext" style="display:none;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+'</div>';});
+      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=ext&&heb>20;if(showExt&&window._lastQuery){var _words=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_words.forEach(function(w){var _root=w.length>3?w.substring(0,3):w;var _re=new RegExp('('+_root+'[\u05D0-\u05EA]*)','g');ext=ext.replace(_re,'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="'+driveLink+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--gold);font-size:0.8em;margin-right:8px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;">פתח ב-Drive ↗</a>'+(showExt?'<div class="src-ext" style="display:block;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+'</div>';});
       var srcDiv = document.createElement('div');
       srcDiv.innerHTML = html;
       turnDiv.appendChild(srcDiv);

@@ -39,7 +39,7 @@ def list_files(service, folder_id):
     page_token = None
     while True:
         resp = service.files().list(
-            q=f"'{folder_id}' in parents and trashed=false",
+            q=f"'{folder_id}' in parents and trashed=false and (mimeType='application/vnd.openxmlformats-officedocument.wordprocessingml.document' or mimeType='application/pdf')",
             fields="nextPageToken, files(id, name, mimeType, modifiedTime)",
             pageToken=page_token, pageSize=100
         ).execute()
@@ -50,14 +50,26 @@ def list_files(service, folder_id):
     return files
 
 def download_file(service, file_id):
-    request = service.files().get_media(fileId=file_id)
-    fh = io.BytesIO()
-    downloader = MediaIoBaseDownload(fh, request)
-    done = False
-    while not done:
-        _, done = downloader.next_chunk()
-    fh.seek(0)
-    return fh
+    try:
+        request = service.files().get_media(fileId=file_id)
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, request)
+        done = False
+        while not done:
+            _, done = downloader.next_chunk()
+        fh.seek(0)
+        return fh
+    except Exception as e:
+        if "fileNotDownloadable" in str(e) or "Only files with binary" in str(e):
+            request = service.files().export_media(fileId=file_id, mimeType='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+            fh = io.BytesIO()
+            downloader = MediaIoBaseDownload(fh, request)
+            done = False
+            while not done:
+                _, done = downloader.next_chunk()
+            fh.seek(0)
+            return fh
+        raise
 
 def extract_text_docx(fh):
     try:
@@ -128,11 +140,13 @@ def main():
             indexed = json.load(fj)
     else:
         indexed = {}
+    from chromadb.utils import embedding_functions
+    ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name='paraphrase-multilingual-MiniLM-L12-v2')
     client = chromadb.PersistentClient(path=CHROMA_DIR)
     try:
-        collection = client.get_collection(COLLECTION_NAME)
+        collection = client.get_collection(COLLECTION_NAME, embedding_function=ef)
     except:
-        collection = client.create_collection(COLLECTION_NAME)
+        collection = client.create_collection(COLLECTION_NAME, embedding_function=ef)
     total_chunks = 0
     new_files = 0
     skipped = 0
