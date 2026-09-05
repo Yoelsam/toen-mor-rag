@@ -1,6 +1,9 @@
 import re
 import time
-import os, pickle, logging
+import os, pickle, logging, io
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload
+from google.auth.transport.requests import Request as GoogleRequest
 from pathlib import Path
 import chromadb
 from chromadb.utils import embedding_functions
@@ -84,7 +87,7 @@ def ask_gemini(query, docs, metas, history=None):
 תשובה מפורטת ומועילה:"""
     for attempt in range(3):
         try:
-            return client_gemini.models.generate_content(model="gemini-2.5-flash", contents=prompt).text
+            return client_gemini.models.generate_content(model="gemini-3.6-flash", contents=prompt).text
         except Exception as e:
             if attempt < 2 and ("503" in str(e) or "UNAVAILABLE" in str(e) or "429" in str(e)):
                 time.sleep(5)
@@ -98,6 +101,49 @@ def home():
         "Pragma": "no-cache",
         "Expires": "0"
     })
+
+def get_drive_service():
+    with open("/home/rag/token.pickle", "rb") as f:
+        creds = pickle.load(f)
+    if creds.expired and creds.refresh_token:
+        creds.refresh(GoogleRequest())
+    return build("drive", "v3", credentials=creds)
+
+@app.get("/api/doc/{file_id}")
+async def get_doc(file_id: str, query: str = ""):
+    try:
+        service = get_drive_service()
+        meta = service.files().get(fileId=file_id, fields="name,mimeType").execute()
+        name = meta.get("name", "")
+        mime = meta.get("mimeType", "")
+        fh = io.BytesIO()
+        if "google-apps.document" in mime:
+            req = service.files().export_media(fileId=file_id, mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        else:
+            req = service.files().get_media(fileId=file_id)
+        downloader = MediaIoBaseDownload(fh, req)
+        done = False
+        while not done:
+            _, done = downloader.next_chunk()
+        fh.seek(0)
+        text = ""
+        if name.endswith(".docx") or "google-apps.document" in mime:
+            try:
+                from docx import Document as DocxDoc
+                doc = DocxDoc(fh)
+                text = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+            except Exception as e:
+                text = "[שגיאה: " + str(e) + "]"
+        elif name.endswith(".pdf"):
+            try:
+                import pdfplumber
+                with pdfplumber.open(fh) as pdf:
+                    text = "\n".join(page.extract_text() or "" for page in pdf.pages)
+            except Exception as e:
+                text = "[שגיאה: " + str(e) + "]"
+        return {"filename": name, "text": text, "query": query}
+    except Exception as e:
+        return {"error": str(e), "filename": "", "text": "", "query": query}
 
 @app.post("/api/search")
 async def search(request: Request, query: str = Form(...), history: str = Form("[]")):
@@ -169,7 +215,7 @@ async def upload(files: list[UploadFile] = File(...), query: str = Form("")):
 \u05DE\u05E7\u05D5\u05E8\u05D5\u05EA \u05E8\u05DC\u05D5\u05D5\u05E0\u05D8\u05D9\u05D9\u05DD:
 {context}
 {"\u05E9\u05D0\u05DC\u05D4: " + query if query else "\u05EA\u05DF \u05E0\u05D9\u05EA\u05D5\u05D7 \u05DE\u05E9\u05E4\u05D8\u05D9 \u05E9\u05DC \u05D4\u05DE\u05E1\u05DE\u05DA \u05E2\u05DD \u05D4\u05E4\u05E0\u05D9\u05D4 \u05DC\u05DE\u05E7\u05D5\u05E8\u05D5\u05EA."}"""
-        response = client_gemini.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+        response = client_gemini.models.generate_content(model="gemini-3.6-flash", contents=prompt)
         seenU=set();srcU=[]
         for d,m in zip(docs,metas):
             if m["filename"] not in seenU:
@@ -207,6 +253,13 @@ body.light .source-item { background:#ffffff; border:1px solid #e6e9ef; border-r
 body.light .source-item:hover { background:#f7f8fa; }
 body.light .btn { color:#ffffff; }
 body.light .answer-title, body.light .sources-title { color:#0f2847; }
+#vwr{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.88);z-index:9999;justify-content:center;align-items:center;}
+#vwr.open{display:flex;}
+#vwr-in{background:var(--card);border-radius:12px;width:92%;max-width:900px;height:85vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border);}
+#vwr-hdr{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+#vwr-title{font-size:0.95em;font-weight:700;color:var(--text);direction:rtl;max-width:75%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#vwr-body{padding:24px;overflow-y:auto;direction:rtl;line-height:2;font-size:0.97em;color:var(--text);flex:1;white-space:pre-wrap;}
+#vwr-body mark{background:#ffd500;color:#0a0e14;border-radius:3px;padding:1px 4px;font-weight:700;}
 body.light .answer-body { color:#1a2433; }
 body.light .faq-item { background:#ffffff !important; border-color:#e6e9ef !important; }
 body.light .faq-title { color:#0f2847; }
@@ -713,7 +766,7 @@ async function search() {
     turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc + suiteBtn;
     if (data.sources) {
       let html='<div class="sources-title">מקורות:</div>';
-      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=ext&&heb>20;if(showExt&&window._lastQuery){var _words=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_words.forEach(function(w){var _root=w.length>3?w.substring(0,3):w;var _re=new RegExp('('+_root+'[\u05D0-\u05EA]*)','g');ext=ext.replace(_re,'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="'+driveLink+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--gold);font-size:0.8em;margin-right:8px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;">פתח ב-Drive ↗</a>'+(showExt?'<div class="src-ext" style="display:block;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+'</div>';});
+      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=ext&&heb>20;if(showExt&&window._lastQuery){var _words=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_words.forEach(function(w){var _root=w.length>3?w.substring(0,3):w;var _re=new RegExp('('+_root+'[\u05D0-\u05EA]*)','g');ext=ext.replace(_re,'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="#" onclick="event.preventDefault();event.stopPropagation();openVwr(this.dataset.fileid,decodeURIComponent(this.dataset.filename),this.dataset.driveurl,decodeURIComponent(this.dataset.extrait||String.fromCharCode(32)));return false;" data-fileid="'+s.file_id+'" data-filename="'+encodeURIComponent(s.filename)+'" data-driveurl="'+driveLink+'" data-extrait="'+encodeURIComponent(s.extrait||'')+'" style="color:var(--gold);font-size:0.8em;margin-right:8px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;cursor:pointer;">📄 צפה במסמך</a>'+(showExt?'<div class="src-ext" style="display:block;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+'</div>';});
       var srcDiv = document.createElement('div');
       srcDiv.innerHTML = html;
       turnDiv.appendChild(srcDiv);
@@ -726,7 +779,49 @@ async function search() {
   }
 }
 </script>
-<script>window.addEventListener("load",function(){fetch("/auth/me").then(function(r){return r.json()}).then(function(u){var links=document.querySelector(".topnav-links");if(links){if(u.authenticated&&u.allowed){var a=document.createElement("a");a.href="/mon-historique";a.textContent="היסטוריה";links.appendChild(a);var b=document.createElement("a");b.href="/auth/logout";b.textContent="יציאה";b.style.opacity="0.6";links.appendChild(b);}else{var c=document.createElement("a");c.href="/auth/login";c.textContent="התחבר";links.appendChild(c);}}}).catch(function(){})});</script><script>window.addEventListener("scroll",function(){var h=document.querySelector(".header");if(h){var y=window.scrollY;h.style.backgroundPosition="center "+(y*0.4)+"px";}});</script><script>
+<script>window.addEventListener("load",function(){fetch("/auth/me").then(function(r){return r.json()}).then(function(u){var links=document.querySelector(".topnav-links");if(links){if(u.authenticated&&u.allowed){var a=document.createElement("a");a.href="/mon-historique";a.textContent="היסטוריה";links.appendChild(a);var b=document.createElement("a");b.href="/auth/logout";b.textContent="יציאה";b.style.opacity="0.6";links.appendChild(b);}else{var c=document.createElement("a");c.href="/auth/login";c.textContent="התחבר";links.appendChild(c);}}}).catch(function(){})});</script><script>window.addEventListener("scroll",function(){var h=document.querySelector(".header");if(h){var y=window.scrollY;h.style.backgroundPosition="center "+(y*0.4)+"px";}})
+document.body.insertAdjacentHTML("beforeend",'<div id="vwr"><div id="vwr-in"><div id="vwr-hdr"><span id="vwr-title"></span><div style="display:flex;gap:10px;align-items:center;"><a id="vwr-drive" href="#" target="_blank" style="color:var(--gold);font-size:0.85em;border:1px solid var(--gold);padding:4px 10px;border-radius:6px;text-decoration:none;">Drive ↗</a><button onclick="closeVwr()" style="background:none;border:none;color:var(--text);font-size:1.5em;cursor:pointer;padding:0 8px;">x</button></div></div><div id="vwr-body">טוען...</div></div></div>');
+function openVwr(fileId,filename,driveUrl,extrait){
+  document.getElementById("vwr-title").textContent=filename;
+  document.getElementById("vwr-drive").href=driveUrl;
+  document.getElementById("vwr-body").innerHTML="טוען מסמך...";
+  document.getElementById("vwr").classList.add("open");
+  document.body.style.overflow="hidden";
+  var q=window._lastQuery||"";
+  fetch("/api/doc/"+fileId+"?query="+encodeURIComponent(q))
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.error){document.getElementById("vwr-body").textContent=data.error;return;}
+      var text=data.text||"";
+      if(q){
+        var words=q.replace(/[^א-תa-zA-Z0-9\s]/g,"").split(/\s+/).filter(function(w){return w.length>2;});
+        words.forEach(function(w){
+          var root=w.length>3?w.substring(0,3):w;
+          var re=new RegExp("("+root+"[א-ת]*)","g");
+          text=text.replace(re,"<mark>$1</mark>");
+        });
+      }
+      var body=document.getElementById("vwr-body");
+      var extraitHtml="";
+      if(extrait&&extrait.length>10){
+        extraitHtml='<div style="background:#ffd500;color:#0a0e14;border-radius:8px;padding:14px 16px;margin-bottom:20px;direction:rtl;font-weight:600;border-right:5px solid #cc9900;">'
+        +'<div style="font-size:0.8em;margin-bottom:6px;opacity:0.7;">📌 קטע רלוונטי מהמאגר</div>'
+        +extrait
+        +'</div><hr style="margin-bottom:20px;opacity:0.2;">';
+      }
+      body.innerHTML=extraitHtml+text;
+      setTimeout(function(){var m=body.querySelector("mark");if(m)m.scrollIntoView({block:"center",behavior:"smooth"});},200);
+    }).catch(function(e){document.getElementById("vwr-body").textContent=""+e;});
+}
+function closeVwr(){
+  document.getElementById("vwr").classList.remove("open");
+  document.body.style.overflow="";
+}
+document.getElementById("vwr").addEventListener("click",function(e){if(e.target===this)closeVwr();});
+document.addEventListener("click",function(e){
+  var btn=e.target.closest("[data-fileid]");
+  if(btn){e.preventDefault();e.stopPropagation();openVwr(btn.dataset.fileid,btn.dataset.filename,btn.dataset.driveurl);}
+});;</script><script>
 function applyTheme(t){
   var b=document.querySelector('.theme-toggle');
   if(t==='light'){document.body.classList.add('light');if(b)b.textContent='🌙';}
@@ -751,7 +846,7 @@ async def create_draft(request: Request):
 שאלת הלקוח: {query}
 ניתוח משפטי: {answer[:3000]}
 צור טיוטה משפטית מקצועית עם: כותרת, פתיחה, עיקר הטענות, סיכום ובקשה מבית הדין."""
-        draft = client_gemini.models.generate_content(model="gemini-2.5-flash", contents=prompt).text
+        draft = client_gemini.models.generate_content(model="gemini-3.6-flash", contents=prompt).text
         return JSONResponse({"draft": draft})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
