@@ -69,6 +69,8 @@ def ask_gemini(query, docs, metas, history=None):
 2. אם המקורות מכילים מידע רלוונטי חלקי - השתמש בו וציין זאת.
 3. אם המקורות אינם מכילים תשובה ישירה - ענה על בסיס עקרונות הלכתיים ומשפטיים כלליים הידועים לך, וציין במפורש שהתשובה מבוססת על ידע כללי ולא על פסיקה ספציפית מהמאגר.
 4. לעולם אל תאמר "אין תשובה" - תמיד ספק את המידע הטוב ביותר שיש לך.
+10. CRITICAL - מקורות עומק: כאשר המסמכים מהמאגר מצטטים בעצמם מקורות הלכתיים או משפטיים (כגון שולחן ערוך, רמב"ם, פסקי דין של בית המשפט העליון, מאמרים אקדמיים, ספרי הלכה), ציין גם את המקורות הללו בתשובתך. זה נותן עומק ואמינות לתשובה.
+11. בתקציר המקורות, כלול את שם המחבר/דיין/שופט אם מוזכר במסמך, וציין את סוג המסמך (פסק דין, מאמר, ספר, שו"ת).
 5. CRITICAL: בכל טענה ציין את מספר המקור בפורמט המדויק [מקור X]
 0. אסור בהחלט ליצור קישורים לאינטרנט, לגוגל דרייב, או כל URL אחר בתשובה. - X הוא המספר שמופיע לפני שם הקובץ במקורות למטה.
 6. דוגמה לתשובה נכונה: "הבעל חייב במזונות אשתו [מקור 1]. עם זאת, אם האישה מורדת, הוא פטור [מקור 3, מקור 4]."
@@ -150,7 +152,12 @@ async def get_doc(file_id: str, query: str = ""):
         if query and text and len(text) > 50:
             try:
                 sum_prompt = u"05d005ea05d4 05e205d505d605e8 05de05e905e405d805d9. 05d705dc05e5 05de05d405de05e105de05da 3-5 05de05e905e405d805d905dd 05e905dc05de05d905dd. 05d405e205ea05e7 05de05e905e405d805d905dd 05de05dc05d005d905dd.\n\n05e905d005dc05d4: " + query + "\n\n05de05e105de05da:\n" + text[:8000]
-                summary = client_gemini.models.generate_content(model="gemini-3.6-flash", contents=sum_prompt).text
+                msg = anthropic_client.messages.create(
+                    model="claude-sonnet-5-5",
+                    max_tokens=2048,
+                    messages=[{"role": "user", "content": sum_prompt}]
+                )
+                summary = next(b.text for b in msg.content if b.type == "text")
             except Exception:
                 summary = ""
         return {"filename": name, "text": text, "query": query, "summary": summary}
@@ -227,12 +234,17 @@ async def upload(files: list[UploadFile] = File(...), query: str = Form("")):
 \u05DE\u05E7\u05D5\u05E8\u05D5\u05EA \u05E8\u05DC\u05D5\u05D5\u05E0\u05D8\u05D9\u05D9\u05DD:
 {context}
 {"\u05E9\u05D0\u05DC\u05D4: " + query if query else "\u05EA\u05DF \u05E0\u05D9\u05EA\u05D5\u05D7 \u05DE\u05E9\u05E4\u05D8\u05D9 \u05E9\u05DC \u05D4\u05DE\u05E1\u05DE\u05DA \u05E2\u05DD \u05D4\u05E4\u05E0\u05D9\u05D4 \u05DC\u05DE\u05E7\u05D5\u05E8\u05D5\u05EA."}"""
-        response = client_gemini.models.generate_content(model="gemini-3.6-flash", contents=prompt)
+        msg = anthropic_client.messages.create(
+            model="claude-sonnet-5-5",
+            max_tokens=4096,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        response_text = next(b.text for b in msg.content if b.type == "text")
         seenU=set();srcU=[]
         for d,m in zip(docs,metas):
             if m["filename"] not in seenU:
                 seenU.add(m["filename"]);srcU.append({"filename":m["filename"],"extrait":d[:3000]})
-        return JSONResponse({"answer": response.text, "sources": srcU})
+        return JSONResponse({"answer": response_text, "sources": srcU})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
@@ -547,6 +559,26 @@ document.getElementById('modal-overlay').addEventListener('click', function(e) {
 document.getElementById('stat1').addEventListener('click', function() { openModal(modalTexts.stat1[0], modalTexts.stat1[1]); });
 document.getElementById('stat2').addEventListener('click', function() { openModal(modalTexts.stat2[0], modalTexts.stat2[1]); });
 document.getElementById('stat3').addEventListener('click', function() { openModal(modalTexts.stat3[0], modalTexts.stat3[1]); });
+
+function injectTaktzir(){
+  var answer=document.querySelector('.answer-body');
+  if(!answer)return;
+  var html=answer.innerHTML;
+  var items=document.querySelectorAll('.source-item');
+  items.forEach(function(item,idx){
+    var num=idx+1;
+    var re=new RegExp('\\*\\s*מקור\\s*'+num+'\\s*[-–]\\s*\\[.*?\\]:\\s*(.+?)(?=\\*\\s*מקור\\s*\\d|$)','s');
+    var m=answer.innerText.match(re);
+    if(m&&m[1]){
+      var txt=m[1].trim().substring(0,200);
+      var div=document.createElement('div');
+      div.style.cssText='font-size:0.85em;color:var(--text-dim);margin-top:6px;line-height:1.5;direction:rtl;padding-right:30px;';
+      div.innerHTML='<span style="color:var(--gold);font-weight:700;">תקציר:</span> '+txt+'...';
+      item.appendChild(div);
+    }
+  });
+}
+
 document.getElementById('help-btn').addEventListener('click', function() { openModal(modalTexts.help[0], modalTexts.help[1]); });
 
 async function generateDraft(btn) {
@@ -785,6 +817,7 @@ async function search() {
       turnDiv.appendChild(srcDiv);
     }
     conv.appendChild(turnDiv);
+    setTimeout(function(){injectTaktzir();},500);
     window.scrollTo({top:0,behavior:"smooth"});
   } catch(e) {
     document.getElementById('loading').style.display='none';
@@ -875,7 +908,12 @@ async def create_draft(request: Request):
 שאלת הלקוח: {query}
 ניתוח משפטי: {answer[:3000]}
 צור טיוטה משפטית מקצועית עם: כותרת, פתיחה, עיקר הטענות, סיכום ובקשה מבית הדין."""
-        draft = client_gemini.models.generate_content(model="gemini-3.6-flash", contents=prompt).text
+        msg = anthropic_client.messages.create(
+            model="claude-sonnet-5-5",
+            max_tokens=4096,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        draft = next(b.text for b in msg.content if b.type == "text")
         return JSONResponse({"draft": draft})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
@@ -904,4 +942,4 @@ async def mon_historique(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, workers=3)
+    uvicorn.run(app, host="0.0.0.0", port=8000, workers=1)
