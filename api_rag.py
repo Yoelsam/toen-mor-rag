@@ -151,7 +151,7 @@ async def get_doc(file_id: str, query: str = ""):
         summary = ""
         if query and text and len(text) > 50:
             try:
-                sum_prompt = u"05d005ea05d4 05e205d505d605e8 05de05e905e405d805d9. 05d705dc05e5 05de05d405de05e105de05da 3-5 05de05e905e405d805d905dd 05e905dc05de05d905dd. 05d405e205ea05e7 05de05e905e405d805d905dd 05de05dc05d005d905dd.\n\n05e905d005dc05d4: " + query + "\n\n05de05e105de05da:\n" + text[:8000]
+                sum_prompt = open('/home/rag/sum_prompt.txt').read() + "\n\nשאלה: " + query + "\n\nמסמך:\n" + text[:8000]
                 msg = anthropic_client.messages.create(
                     model="claude-sonnet-5-5",
                     max_tokens=2048,
@@ -857,9 +857,10 @@ function openVwr(fileId,filename,driveUrl,extrait){
       if(extrait&&extrait.length>10){
         extraitHtml='<div style="background:#ffd500;color:#0a0e14;border-radius:8px;padding:14px 16px;margin-bottom:20px;direction:rtl;font-weight:600;border-right:5px solid #cc9900;">'
         +'<div style="font-size:0.8em;margin-bottom:6px;opacity:0.7;">📌 קטע רלוונטי מהמאגר</div>'
-        +(data.summary||extrait)
+        +extrait
         +'</div><hr style="margin-bottom:20px;opacity:0.2;">';
       }
+      if(window._lastQuery){var _w=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_w.forEach(function(w){var _r=w.length>3?w.substring(0,3):w;extraitHtml=extraitHtml.replace(new RegExp('('+_r+'[\u05D0-\u05EA]*)','g'),'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}
       body.innerHTML=extraitHtml;
       setTimeout(function(){var m=body.querySelector("mark");if(m)m.scrollIntoView({block:"center",behavior:"smooth"});},200);
     }).catch(function(e){document.getElementById("vwr-body").textContent=""+e;});
