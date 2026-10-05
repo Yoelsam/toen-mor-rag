@@ -8,6 +8,7 @@ from pathlib import Path
 import chromadb
 from chromadb.utils import embedding_functions
 from google import genai
+import anthropic
 from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,6 +23,8 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 client_gemini = genai.Client(api_key=GEMINI_API_KEY)
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+anthropic_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 embed_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="paraphrase-multilingual-MiniLM-L12-v2")
 client = chromadb.PersistentClient(path=CHROMA_DIR)
@@ -35,22 +38,19 @@ app.add_middleware(SessionMiddleware,secret_key=os.environ["SESSION_SECRET"],htt
 app.include_router(auth.router)
 database.init_db()
 
-def search_docs(query, n=10):
-    results = collection.query(query_texts=[query], n_results=60)
+def search_docs(query, n=30):
+    results = collection.query(query_texts=[query], n_results=120)
     docs_all = results["documents"][0]
     metas_all = results["metadatas"][0]
     seen = set()
-    docx_list = []
-    pdf_list = []
+    mixed = []
     for d, m in zip(docs_all, metas_all):
         fn = m.get("filename", "")
         if fn not in seen:
             seen.add(fn)
-            if fn.endswith(".docx"):
-                docx_list.append((d, m))
-            elif fn.endswith(".pdf"):
-                pdf_list.append((d, m))
-    mixed = docx_list[:7] + pdf_list[:3]
+            mixed.append((d, m))
+        if len(mixed) >= n:
+            break
     docs_dedup = [x[0] for x in mixed]
     metas_dedup = [x[1] for x in mixed]
     return docs_dedup, metas_dedup
@@ -87,7 +87,12 @@ def ask_gemini(query, docs, metas, history=None):
 תשובה מפורטת ומועילה:"""
     for attempt in range(3):
         try:
-            return client_gemini.models.generate_content(model="gemini-3.6-flash", contents=prompt).text
+            msg = anthropic_client.messages.create(
+                model="claude-sonnet-5-5",
+                max_tokens=4096,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return next(b.text for b in msg.content if b.type == "text")
         except Exception as e:
             if attempt < 2 and ("503" in str(e) or "UNAVAILABLE" in str(e) or "429" in str(e)):
                 time.sleep(5)
@@ -141,7 +146,14 @@ async def get_doc(file_id: str, query: str = ""):
                     text = "\n".join(page.extract_text() or "" for page in pdf.pages)
             except Exception as e:
                 text = "[שגיאה: " + str(e) + "]"
-        return {"filename": name, "text": text, "query": query}
+        summary = ""
+        if query and text and len(text) > 50:
+            try:
+                sum_prompt = u"05d005ea05d4 05e205d505d605e8 05de05e905e405d805d9. 05d705dc05e5 05de05d405de05e105de05da 3-5 05de05e905e405d805d905dd 05e905dc05de05d905dd. 05d405e205ea05e7 05de05e905e405d805d905dd 05de05dc05d005d905dd.\n\n05e905d005dc05d4: " + query + "\n\n05de05e105de05da:\n" + text[:8000]
+                summary = client_gemini.models.generate_content(model="gemini-3.6-flash", contents=sum_prompt).text
+            except Exception:
+                summary = ""
+        return {"filename": name, "text": text, "query": query, "summary": summary}
     except Exception as e:
         return {"error": str(e), "filename": "", "text": "", "query": query}
 
@@ -167,7 +179,7 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
         seen=set();sources=[]
         for d,m in zip(docs,metas):
             if m["filename"] not in seen:
-                seen.add(m["filename"]);sources.append({"filename":m["filename"],"extrait":d[:400],"file_id":m.get("file_id","")})
+                seen.add(m["filename"]);sources.append({"filename":m["filename"],"extrait":d[:3000],"file_id":m.get("file_id","")})
         try:
             user = auth.get_current_user(request)
             if user and user.get("allowed"):
@@ -767,7 +779,7 @@ async function search() {
     turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc + suiteBtn;
     if (data.sources) {
       let html='<div class="sources-title">מקורות:</div>';
-      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=ext&&heb>20;if(showExt&&window._lastQuery){var _words=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_words.forEach(function(w){var _root=w.length>3?w.substring(0,3):w;var _re=new RegExp('('+_root+'[\u05D0-\u05EA]*)','g');ext=ext.replace(_re,'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="#" onclick="event.preventDefault();event.stopPropagation();openVwr(this.dataset.fileid,decodeURIComponent(this.dataset.filename),this.dataset.driveurl,decodeURIComponent(this.dataset.extrait||String.fromCharCode(32)));return false;" data-fileid="'+s.file_id+'" data-filename="'+encodeURIComponent(s.filename)+'" data-driveurl="'+driveLink+'" data-extrait="'+encodeURIComponent(s.extrait||'')+'" style="color:var(--gold);font-size:0.8em;margin-right:8px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;cursor:pointer;">📄 צפה במסמך</a><a href="https://wa.me/?text='+encodeURIComponent(s.filename+' - '+driveLink)+'" target="_blank" onclick="event.stopPropagation()" style="color:#25d366;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #25d366;padding:2px 6px;border-radius:4px;">💬</a><a href="mailto:?subject='+encodeURIComponent(s.filename)+'&body='+encodeURIComponent(driveLink)+'" onclick="event.stopPropagation()" style="color:#3498db;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #3498db;padding:2px 6px;border-radius:4px;">📧</a><a href="'+driveLink+'" target="_blank" onclick="event.stopPropagation()" style="color:#fbbc04;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #fbbc04;padding:2px 6px;border-radius:4px;">☁️</a>'+(showExt?'<div class="src-ext" style="display:block;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+'</div>';});
+      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=false;if(showExt&&window._lastQuery){var _words=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_words.forEach(function(w){var _root=w.length>3?w.substring(0,3):w;var _re=new RegExp('('+_root+'[\u05D0-\u05EA]*)','g');ext=ext.replace(_re,'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="#" onclick="event.preventDefault();event.stopPropagation();openVwr(this.dataset.fileid,decodeURIComponent(this.dataset.filename),this.dataset.driveurl,decodeURIComponent(this.dataset.extrait||String.fromCharCode(32)));return false;" data-fileid="'+s.file_id+'" data-filename="'+encodeURIComponent(s.filename)+'" data-driveurl="'+driveLink+'" data-extrait="'+encodeURIComponent(s.extrait||'')+'" style="color:var(--gold);font-size:0.8em;margin-right:8px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;cursor:pointer;">📄 צפה במסמך</a><a href="https://wa.me/?text='+encodeURIComponent(s.filename+' - '+driveLink)+'" target="_blank" onclick="event.stopPropagation()" style="color:#25d366;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #25d366;padding:2px 6px;border-radius:4px;">💬</a><a href="mailto:?subject='+encodeURIComponent(s.filename)+'&body='+encodeURIComponent(driveLink)+'" onclick="event.stopPropagation()" style="color:#3498db;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #3498db;padding:2px 6px;border-radius:4px;">📧</a><a href="'+driveLink+'" target="_blank" onclick="event.stopPropagation()" style="color:#fbbc04;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #fbbc04;padding:2px 6px;border-radius:4px;">☁️</a>'+(showExt?'<div class="src-ext" style="display:block;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+'</div>';});
       var srcDiv = document.createElement('div');
       srcDiv.innerHTML = html;
       turnDiv.appendChild(srcDiv);
@@ -812,10 +824,10 @@ function openVwr(fileId,filename,driveUrl,extrait){
       if(extrait&&extrait.length>10){
         extraitHtml='<div style="background:#ffd500;color:#0a0e14;border-radius:8px;padding:14px 16px;margin-bottom:20px;direction:rtl;font-weight:600;border-right:5px solid #cc9900;">'
         +'<div style="font-size:0.8em;margin-bottom:6px;opacity:0.7;">📌 קטע רלוונטי מהמאגר</div>'
-        +extrait
+        +(data.summary||extrait)
         +'</div><hr style="margin-bottom:20px;opacity:0.2;">';
       }
-      body.innerHTML=extraitHtml+text;
+      body.innerHTML=extraitHtml;
       setTimeout(function(){var m=body.querySelector("mark");if(m)m.scrollIntoView({block:"center",behavior:"smooth"});},200);
     }).catch(function(e){document.getElementById("vwr-body").textContent=""+e;});
 }
@@ -892,4 +904,4 @@ async def mon_historique(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, workers=3)
