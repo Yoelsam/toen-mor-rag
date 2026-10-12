@@ -203,21 +203,19 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
         except Exception:
             pass
         # Generer un taktzir pour chaque source
-        for src in sources[:5]:
+        # Generer taktzirim en parallele avec threads
+        import concurrent.futures
+        def gen_taktzir(src):
             ext = src.get("extrait", "")
-            if ext and len(ext) > 50:
-                try:
-                    taktzir_prompt = "תמצת את המסמך המשפטי הבא ב-3-4 משפטים. כלול: סוג המסמך (פסק דין/מאמר/שו\"ת), שם הערכאה, הצדדים, הסוגיה המרכזית, וההחלטה. אם יש שם שופט/דיין או מספר תיק - ציין. ענה בעברית בלבד.\n\n" + ext[:2000]
-                    tmsg = anthropic_client.messages.create(
-                        model="claude-sonnet-5-5",
-                        max_tokens=300,
-                        messages=[{"role": "user", "content": taktzir_prompt}]
-                    )
-                    tblocks = [b.text for b in tmsg.content if hasattr(b, "text") and b.type == "text"]
-                    src["taktzir"] = tblocks[0] if tblocks else ""
-                except Exception:
-                    src["taktzir"] = ""
-            # Type de document
+            if not ext or len(ext) < 50:
+                return
+            try:
+                tp = "תמצת את המסמך המשפטי הבא ב-2-3 משפטים קצרים. ציין: סוג המסמך, ערכאה, צדדים, סוגיה, החלטה, שם שופט/דיין ומספר תיק אם יש. עברית בלבד.\n\n" + ext[:1500]
+                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=150, messages=[{"role":"user","content":tp}])
+                tblocks = [b.text for b in tmsg.content if hasattr(b,"text") and b.type=="text"]
+                src["taktzir"] = tblocks[0] if tblocks else ""
+            except Exception:
+                src["taktzir"] = ""
             fn = src["filename"].lower()
             if any(w in fn for w in ["פסק", "פס_ד", "החלט"]):
                 src["doc_type"] = "פסק דין"
@@ -227,6 +225,9 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
                 src["doc_type"] = "PDF"
             else:
                 src["doc_type"] = "מסמך"
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
+            ex.map(gen_taktzir, sources[:5])
+
         return JSONResponse({"answer": answer, "sources": sources})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
@@ -845,7 +846,7 @@ async function search() {
     turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc + suiteBtn;
     if (data.sources) {
       let html='<div class="sources-title">מקורות:</div>';
-      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=false;if(showExt&&window._lastQuery){var _words=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_words.forEach(function(w){var _root=w.length>3?w.substring(0,3):w;var _re=new RegExp('('+_root+'[\u05D0-\u05EA]*)','g');ext=ext.replace(_re,'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="#" onclick="event.preventDefault();event.stopPropagation();openVwr(this.dataset.fileid,decodeURIComponent(this.dataset.filename),this.dataset.driveurl,decodeURIComponent(this.dataset.extrait||String.fromCharCode(32)));return false;" data-fileid="'+s.file_id+'" data-filename="'+encodeURIComponent(s.filename)+'" data-driveurl="'+driveLink+'" data-extrait="'+encodeURIComponent(s.extrait||'')+'" style="color:var(--gold);font-size:0.8em;margin-right:8px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;cursor:pointer;">📄 צפה במסמך</a><a href="https://wa.me/?text='+encodeURIComponent(s.filename+' - '+driveLink)+'" target="_blank" onclick="event.stopPropagation()" style="color:#25d366;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #25d366;padding:2px 6px;border-radius:4px;">💬</a><a href="mailto:?subject='+encodeURIComponent(s.filename)+'&body='+encodeURIComponent(driveLink)+'" onclick="event.stopPropagation()" style="color:#3498db;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #3498db;padding:2px 6px;border-radius:4px;">📧</a><a href="'+driveLink+'" target="_blank" onclick="event.stopPropagation()" style="color:#fbbc04;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #fbbc04;padding:2px 6px;border-radius:4px;">☁️</a>'+(showExt?'<div class="src-ext" style="display:block;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+(s.taktzir?'<div style="font-size:0.85em;color:var(--text);margin-top:6px;line-height:1.6;direction:rtl;padding-right:30px;background:rgba(255,213,0,0.08);border-radius:6px;padding:8px 12px;"><span style="color:var(--gold);font-weight:700;">'+( s.doc_type||'מסמך')+' | </span>'+s.taktzir+'</div>':'')+'</div>';});
+      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=false;if(showExt&&window._lastQuery){var _words=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_words.forEach(function(w){var _root=w.length>3?w.substring(0,3):w;var _re=new RegExp('('+_root+'[\u05D0-\u05EA]*)','g');ext=ext.replace(_re,'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="#" onclick="event.preventDefault();event.stopPropagation();window.open(this.dataset.driveurl,\'_blank\');return false;" data-fileid="'+s.file_id+'" data-filename="'+encodeURIComponent(s.filename)+'" data-driveurl="'+driveLink+'" data-extrait="'+encodeURIComponent(s.extrait||'')+'" style="color:var(--gold);font-size:0.8em;margin-right:8px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;cursor:pointer;">📄 צפה במסמך</a><a href="https://wa.me/?text='+encodeURIComponent(s.filename+' - '+driveLink)+'" target="_blank" onclick="event.stopPropagation()" style="color:#25d366;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #25d366;padding:2px 6px;border-radius:4px;">💬</a><a href="mailto:?subject='+encodeURIComponent(s.filename)+'&body='+encodeURIComponent(driveLink)+'" onclick="event.stopPropagation()" style="color:#3498db;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #3498db;padding:2px 6px;border-radius:4px;">📧</a><a href="'+driveLink+'" target="_blank" onclick="event.stopPropagation()" style="color:#fbbc04;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #fbbc04;padding:2px 6px;border-radius:4px;">☁️</a>'+(showExt?'<div class="src-ext" style="display:block;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+(s.taktzir?'<div style="font-size:0.85em;color:var(--text);margin-top:6px;line-height:1.6;direction:rtl;padding-right:30px;background:rgba(255,213,0,0.08);border-radius:6px;padding:8px 12px;"><span style="color:var(--gold);font-weight:700;">'+( s.doc_type||'מסמך')+' | </span>'+s.taktzir+'</div>':'')+'</div>';});
       var srcDiv = document.createElement('div');
       srcDiv.innerHTML = html;
       turnDiv.appendChild(srcDiv);
