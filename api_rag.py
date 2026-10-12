@@ -210,8 +210,8 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
             if not ext or len(ext) < 50:
                 return
             try:
-                tp = "כתוב תקציר של המסמך המשפטי הבא כפסקה אחת רציפה (3-5 משפטים). הסגנון: סיפורי ועובדתי, כמו תקציר פסק דין. כלול: מה הסוגיה, מה קבע בית המשפט/בית הדין, שם השופט/דיין אם מוזכר, ומה המשמעות המעשית. אל תשתמש בכותרות, סימני #, כוכביות או עיצוב. רק טקסט רגיל בעברית.\n\n" + ext[:1500]
-                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=150, messages=[{"role":"user","content":tp}])
+                tp = "כתוב תקציר מפורט של המסמך המשפטי הבא. התקציר חייב להיות 2-3 פסקאות (10-15 משפטים). הסגנון: סיפורי, עובדתי ומקצועי, כמו תקציר פסק דין באתר נבו או LawMate.\n\nכלול את כל הפרטים הבאים:\n- מהי הסוגיה המשפטית/הלכתית שנדונה\n- מי הצדדים (אם מוזכרים)\n- מה טען כל צד\n- מה קבע בית המשפט/בית הדין ומדוע\n- שם השופט/דיין אם מוזכר\n- מספר תיק אם מוזכר\n- מה המשמעות המעשית של ההחלטה\n\nאל תשתמש בכותרות, סימני #, כוכביות, מספור או כל עיצוב. רק טקסט רגיל רציף בעברית.\n\n" + ext[:2000]
+                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=500, messages=[{"role":"user","content":tp}])
                 tblocks = [b.text for b in tmsg.content if hasattr(b,"text") and b.type=="text"]
                 src["taktzir"] = tblocks[0] if tblocks else ""
             except Exception:
@@ -840,7 +840,7 @@ async function search() {
     var ansBody = linkSrc(data.answer).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>").replace(/<strong>תמצית:<\/strong>/g,"<span style='background:#ffd500;color:#0a0e14;border-radius:4px;padding:2px 8px;font-weight:700;margin-left:6px;'>📋 תמצית</span> <button onclick='readAnswer()' style='background:none;border:1px solid #ffd500;color:#ffd500;border-radius:6px;padding:3px 8px;font-size:1em;cursor:pointer;'>🔊 קרא</button>");
     var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
     var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;"><button class="btn-pdf" onclick="exportPDF()">&#x1F4C4; PDF</button><button class="btn-pdf" onclick="copyAnswer()" title="העתק">&#x1F4CB;</button><button class="btn-pdf" onclick="printAnswer()" title="הדפס">&#x1F5A8;&#xFE0F;</button><button class="btn-pdf" onclick="shareWhatsApp()" style="color:#25d366;border-color:#25d366;" title="WhatsApp">&#x1F4AC;</button><button class="btn-pdf" onclick="shareEmail()" title="Email">&#x1F4E7;</button><button class="btn-pdf" onclick="shareFacebook()" style="color:#1877f2;border-color:#1877f2;" title="Facebook">&#x1F4D8;</button><button class="btn-pdf" onclick="shareTwitter()" style="color:#000;border-color:#000;" title="X">𝕏</button><button class="btn-pdf" onclick="shareLinkedIn()" style="color:#0077b5;border-color:#0077b5;" title="LinkedIn">&#x1F4BC;</button><button class="btn-pdf" onclick="saveToDrive()" style="color:#fbbc04;border-color:#fbbc04;" title="Google Drive">&#x2601;&#xFE0F;</button></div></div>';
-    var draftBtnHtml = '<button class="btn-draft" onclick="generateDraft(this)">צור טיוטה</button>';
+    var draftBtnHtml = '';
     var suiteBtn = '<div style="margin-top:12px;text-align:center;"><button onclick="scrollToQuery()" style="background:linear-gradient(135deg,#1a5c3a,#0f3d26);border:2px solid #ffd500;color:#ffd500;padding:12px 22px;border-radius:8px;font-size:1.05em;font-weight:700;cursor:pointer;animation:blink-gold 1.2s ease-in-out infinite;">שאלה בהמשך ↓</button></div>';
     hdr = hdr.replace('</div>', draftBtnHtml + '</div>');
     turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc + suiteBtn;
