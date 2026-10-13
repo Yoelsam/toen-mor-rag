@@ -66,7 +66,7 @@ def ask_gemini(query, docs, metas, history=None):
         try:
             msg = anthropic_client.messages.create(
                 model="claude-sonnet-5-5",
-                max_tokens=12000,
+                max_tokens=6000,
                 messages=[{"role": "user", "content": prompt}]
             )
             text_blocks = [b.text for b in msg.content if hasattr(b, 'text') and b.type == "text"]
@@ -163,8 +163,8 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
         for d,m in zip(docs,metas):
             if m["filename"] not in seen:
                 seen.add(m["filename"]);sources.append({"filename":m["filename"],"extrait":d[:3000],"file_id":m.get("file_id","")})
-                if len(sources) >= 5: break
-                if len(sources) >= 5: break
+                if len(sources) >= 7: break
+                if len(sources) >= 7: break
         try:
             user = auth.get_current_user(request)
             if user and user.get("allowed"):
@@ -180,7 +180,7 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
                 return
             try:
                 tp = open("/home/rag/taktzir_prompt.txt").read() + "\nשאלה שנשאלה: " + query + "\n\nמסמך:\n" + ext[:2000]
-                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=1200, messages=[{"role":"user","content":tp}])
+                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=600, messages=[{"role":"user","content":tp}])
                 tblocks = [b.text for b in tmsg.content if hasattr(b,"text") and b.type=="text"]
                 raw = tblocks[0] if tblocks else ''
                 import re as _r
@@ -201,7 +201,7 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
                 src["doc_type"] = "PDF"
             else:
                 src["doc_type"] = "מסמך"
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=7) as ex:
             ex.map(gen_taktzir, sources[:7])
 
         return JSONResponse({"answer": answer, "sources": sources})
@@ -247,7 +247,7 @@ async def upload(files: list[UploadFile] = File(...), query: str = Form("")):
 {"\u05E9\u05D0\u05DC\u05D4: " + query if query else "\u05EA\u05DF \u05E0\u05D9\u05EA\u05D5\u05D7 \u05DE\u05E9\u05E4\u05D8\u05D9 \u05E9\u05DC \u05D4\u05DE\u05E1\u05DE\u05DA \u05E2\u05DD \u05D4\u05E4\u05E0\u05D9\u05D4 \u05DC\u05DE\u05E7\u05D5\u05E8\u05D5\u05EA."}"""
         msg = anthropic_client.messages.create(
             model="claude-sonnet-5-5",
-            max_tokens=4096,
+            max_tokens=5000,
             messages=[{"role": "user", "content": prompt}]
         )
         response_text = next(b.text for b in msg.content if b.type == "text")
@@ -922,7 +922,7 @@ async def create_draft(request: Request):
 צור טיוטה משפטית מקצועית עם: כותרת, פתיחה, עיקר הטענות, סיכום ובקשה מבית הדין."""
         msg = anthropic_client.messages.create(
             model="claude-sonnet-5-5",
-            max_tokens=4096,
+            max_tokens=5000,
             messages=[{"role": "user", "content": prompt}]
         )
         draft = next(b.text for b in msg.content if b.type == "text")
