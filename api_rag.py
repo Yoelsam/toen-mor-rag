@@ -61,45 +61,12 @@ def ask_gemini(query, docs, metas, history=None):
     if history:
         for h in history[-4:]:
             history_text += f"\n\u05E9\u05D0\u05DC\u05D4 \u05E7\u05D5\u05D3\u05DE\u05EA: {h['q']}\n\u05EA\u05E9\u05D5\u05D1\u05D4 \u05E7\u05D5\u05D3\u05DE\u05EA: {h['a'][:500]}\n---"
-    prompt = f"""אתה עוזר משפטי מומחה המתמחה בדיני משפחה, דיני עבודה ודיני רבניים בישראל.
-תפקידך לענות על שאלות משפטיות בצורה מפורטת, מדויקת ומועילה.
-
-כללי תשובה:
-1. השתמש במקורות שסופקו כבסיס עיקרי לתשובתך.
-2. אם המקורות מכילים מידע רלוונטי חלקי - השתמש בו וציין זאת.
-3. אם המקורות אינם מכילים תשובה ישירה - ענה על בסיס עקרונות הלכתיים ומשפטיים כלליים הידועים לך, וציין במפורש שהתשובה מבוססת על ידע כללי ולא על פסיקה ספציפית מהמאגר.
-4. לעולם אל תאמר "אין תשובה" - תמיד ספק את המידע הטוב ביותר שיש לך.
-10. CRITICAL - מקורות עומק: כאשר המסמכים מהמאגר מצטטים בעצמם מקורות הלכתיים או משפטיים (כגון שולחן ערוך, רמב"ם, פסקי דין של בית המשפט העליון, מאמרים אקדמיים, ספרי הלכה), ציין גם את המקורות הללו בתשובתך. זה נותן עומק ואמינות לתשובה.
-11. בתקציר המקורות, כלול את שם המחבר/דיין/שופט אם מוזכר במסמך, וציין את סוג המסמך (פסק דין, מאמר, ספר, שו"ת).
-5. CRITICAL: בכל טענה ציין את מספר המקור בפורמט המדויק [מקור X]
-0. אסור בהחלט ליצור קישורים לאינטרנט, לגוגל דרייב, או כל URL אחר בתשובה. - X הוא המספר שמופיע לפני שם הקובץ במקורות למטה.
-6. דוגמה לתשובה נכונה: "הבעל חייב במזונות אשתו [מקור 1]. עם זאת, אם האישה מורדת, הוא פטור [מקור 3, מקור 4]."
-   CRITICAL: כתוב תמיד [מקור X] עם סוגריים מרובעות בלבד, לעולם לא [[מקור X]] עם סוגריים כפולות.
-7. חובה להשתמש במקורות שונים - לא רק מקור אחד. בדוק כל מקור וציין אותו בנפרד.
-12. מבנה התשובה חייב לכלול את כל החלקים הבאים:
-   א. **תמצית:** סיכום קצר של 2-3 משפטים.
-   ב. **עיקר הדין:** ניתוח מפורט עם סעיפים ממוספרים. כל סעיף חייב לכלול הפניה למקור [מקור X]. פרט כל טענה, כל דעה חולקת, כל חריג.
-   ג. **ניתוח המקרה:** רשימה של השאלות המפתח והשלכותיהן.
-   ד. **המלצה מעשית:** צעדים קונקרטיים עם הפניות למקורות.
-   ה. **סימוכין:** מקורות הלכתיים ומשפטיים שהמסמכים עצמם מצטטים (רמב"ם, שולחן ערוך, פסקי דין של בית המשפט העליון, בג"צ).
-   ו. **תקציר המקורות:** לכל מקור - שם הקובץ, סוג המסמך, שם המחבר/דיין/שופט אם ידוע, ותקציר קצר.
-13. התשובה חייבת להיות מקיפה ומפורטת, כולל דעות חולקות, חריגים, והלכות רלוונטיות.
-8. מבנה התשובה: עיקר הדין / ניתוח המקרה / המלצה מעשית.
-9. CRITICAL: חובה לפתוח כל תשובה בשורה זו בדיוק: **תמצית:** [משפט אחד קצר המסכם את עיקר התשובה]. אחר כך עיקר הדין.
-
-{history_text}
-
-מקורות מהמאגר:
-{context}
-
-שאלה: {query}
-
-תשובה מפורטת ומועילה:"""
+    prompt = open("/home/rag/system_prompt.txt").read() + "\n" + history_text + "\n\n" + context + "\n\nשאלה: " + query + "\n\nתשובה מפורטת ומועילה:"
     for attempt in range(3):
         try:
             msg = anthropic_client.messages.create(
                 model="claude-sonnet-5-5",
-                max_tokens=4096,
+                max_tokens=6000,
                 messages=[{"role": "user", "content": prompt}]
             )
             text_blocks = [b.text for b in msg.content if hasattr(b, 'text') and b.type == "text"]
@@ -853,7 +820,7 @@ async function search() {
     turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc + suiteBtn;
     if (data.sources) {
       let html='<div class="sources-title">מקורות:</div>';
-      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=false;if(showExt&&window._lastQuery){var _words=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_words.forEach(function(w){var _root=w.length>3?w.substring(0,3):w;var _re=new RegExp('('+_root+'[\u05D0-\u05EA]*)','g');ext=ext.replace(_re,'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="#" onclick="event.preventDefault();event.stopPropagation();window.open(this.dataset.driveurl,String.fromCharCode(95)+String.fromCharCode(98)+String.fromCharCode(108)+String.fromCharCode(97)+String.fromCharCode(110)+String.fromCharCode(107));return false;" data-fileid="'+s.file_id+'" data-filename="'+encodeURIComponent(s.filename)+'" data-driveurl="'+driveLink+'" data-extrait="'+encodeURIComponent(s.extrait||'')+'" style="color:var(--gold);font-size:0.8em;margin-right:8px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;cursor:pointer;">📄 צפה במסמך</a><a href="https://wa.me/?text='+encodeURIComponent(s.filename+' - '+driveLink)+'" target="_blank" onclick="event.stopPropagation()" style="color:#25d366;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #25d366;padding:2px 6px;border-radius:4px;">💬</a><a href="mailto:?subject='+encodeURIComponent(s.filename)+'&body='+encodeURIComponent(driveLink)+'" onclick="event.stopPropagation()" style="color:#3498db;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #3498db;padding:2px 6px;border-radius:4px;">📧</a><a href="'+driveLink+'" target="_blank" onclick="event.stopPropagation()" style="color:#fbbc04;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #fbbc04;padding:2px 6px;border-radius:4px;">☁️</a>'+(showExt?'<div class="src-ext" style="display:block;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+(s.taktzir?'<div style="font-size:0.85em;color:var(--text);margin-top:6px;line-height:1.6;direction:rtl;background:rgba(255,213,0,0.08);border-radius:6px;padding:8px 12px;">'+(s.judges?'<div style="color:var(--gold);font-weight:700;margin-bottom:4px;">שופטים: '+s.judges+'</div>':'')+(s.tik?'<div style="color:var(--text-dim);font-size:0.9em;margin-bottom:4px;">'+s.tik+'</div>':'')+'<div>'+s.taktzir+'</div></div>':'')+'</div>';});
+      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=false;if(showExt&&window._lastQuery){var _words=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_words.forEach(function(w){var _root=w.length>3?w.substring(0,3):w;var _re=new RegExp('('+_root+'[\u05D0-\u05EA]*)','g');ext=ext.replace(_re,'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+' <a href="https://wa.me/?text='+encodeURIComponent(s.filename+' - '+driveLink)+'" target="_blank" onclick="event.stopPropagation()" style="color:#25d366;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #25d366;padding:2px 6px;border-radius:4px;">WhatsApp</a><a href="mailto:?subject='+encodeURIComponent(s.filename)+'&body='+encodeURIComponent(driveLink)+'" onclick="event.stopPropagation()" style="color:#3498db;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #3498db;padding:2px 6px;border-radius:4px;">Email</a></div>'+(showExt?'<div class="src-ext" style="display:block;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+(s.taktzir?'<div style="font-size:0.85em;color:var(--text);margin-top:6px;line-height:1.6;direction:rtl;background:rgba(255,213,0,0.08);border-radius:6px;padding:8px 12px;">'+(s.judges?'<div style="color:var(--gold);font-weight:700;margin-bottom:4px;">שופטים: '+s.judges+'</div>':'')+(s.tik?'<div style="color:var(--text-dim);font-size:0.9em;margin-bottom:4px;">'+s.tik+'</div>':'')+'<div>'+s.taktzir+'</div></div>':'')+'</div>';});
       var srcDiv = document.createElement('div');
       srcDiv.innerHTML = html;
       turnDiv.appendChild(srcDiv);
