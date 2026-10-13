@@ -66,7 +66,7 @@ def ask_gemini(query, docs, metas, history=None):
         try:
             msg = anthropic_client.messages.create(
                 model="claude-sonnet-5-5",
-                max_tokens=8000,
+                max_tokens=12000,
                 messages=[{"role": "user", "content": prompt}]
             )
             text_blocks = [b.text for b in msg.content if hasattr(b, 'text') and b.type == "text"]
@@ -163,6 +163,8 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
         for d,m in zip(docs,metas):
             if m["filename"] not in seen:
                 seen.add(m["filename"]);sources.append({"filename":m["filename"],"extrait":d[:3000],"file_id":m.get("file_id","")})
+                if len(sources) >= 5: break
+                if len(sources) >= 5: break
         try:
             user = auth.get_current_user(request)
             if user and user.get("allowed"):
@@ -177,8 +179,8 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
             if not ext or len(ext) < 50:
                 return
             try:
-                tp = open("/home/rag/taktzir_prompt.txt").read() + ext[:2000]
-                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=500, messages=[{"role":"user","content":tp}])
+                tp = open("/home/rag/taktzir_prompt.txt").read() + "\nשאלה שנשאלה: " + query + "\n\nמסמך:\n" + ext[:2000]
+                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=1200, messages=[{"role":"user","content":tp}])
                 tblocks = [b.text for b in tmsg.content if hasattr(b,"text") and b.type=="text"]
                 raw = tblocks[0] if tblocks else ''
                 import re as _r
@@ -200,7 +202,7 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
             else:
                 src["doc_type"] = "מסמך"
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
-            ex.map(gen_taktzir, sources[:5])
+            ex.map(gen_taktzir, sources[:7])
 
         return JSONResponse({"answer": answer, "sources": sources})
     except Exception as e:
