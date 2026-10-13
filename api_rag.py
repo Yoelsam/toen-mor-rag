@@ -66,7 +66,7 @@ def ask_gemini(query, docs, metas, history=None):
         try:
             msg = anthropic_client.messages.create(
                 model="claude-sonnet-5-5",
-                max_tokens=6000,
+                max_tokens=8000,
                 messages=[{"role": "user", "content": prompt}]
             )
             text_blocks = [b.text for b in msg.content if hasattr(b, 'text') and b.type == "text"]
