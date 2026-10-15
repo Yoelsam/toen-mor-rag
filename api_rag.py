@@ -66,7 +66,7 @@ def ask_gemini(query, docs, metas, history=None):
         try:
             msg = anthropic_client.messages.create(
                 model="claude-sonnet-5-5",
-                max_tokens=6000,
+                max_tokens=8000,
                 messages=[{"role": "user", "content": prompt}]
             )
             text_blocks = [b.text for b in msg.content if hasattr(b, 'text') and b.type == "text"]
@@ -162,9 +162,9 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
         seen=set();sources=[]
         for d,m in zip(docs,metas):
             if m["filename"] not in seen:
-                seen.add(m["filename"]);sources.append({"filename":m["filename"],"extrait":d[:3000],"file_id":m.get("file_id","")})
-                if len(sources) >= 7: break
-                if len(sources) >= 7: break
+                seen.add(m["filename"]);sources.append({"filename":m["filename"],"extrait":d[:800],"file_id":m.get("file_id","")})
+                if len(sources) >= 5: break
+                if len(sources) >= 5: break
         try:
             user = auth.get_current_user(request)
             if user and user.get("allowed"):
@@ -180,7 +180,7 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
                 return
             try:
                 tp = open("/home/rag/taktzir_prompt.txt").read() + "\nשאלה שנשאלה: " + query + "\n\nמסמך:\n" + ext[:2000]
-                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=600, messages=[{"role":"user","content":tp}])
+                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=800, messages=[{"role":"user","content":tp}])
                 tblocks = [b.text for b in tmsg.content if hasattr(b,"text") and b.type=="text"]
                 raw = tblocks[0] if tblocks else ''
                 import re as _r
@@ -201,8 +201,8 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
                 src["doc_type"] = "PDF"
             else:
                 src["doc_type"] = "מסמך"
-        with concurrent.futures.ThreadPoolExecutor(max_workers=7) as ex:
-            ex.map(gen_taktzir, sources[:7])
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
+            ex.map(gen_taktzir, sources[:5])
 
         return JSONResponse({"answer": answer, "sources": sources})
     except Exception as e:
@@ -254,7 +254,7 @@ async def upload(files: list[UploadFile] = File(...), query: str = Form("")):
         seenU=set();srcU=[]
         for d,m in zip(docs,metas):
             if m["filename"] not in seenU:
-                seenU.add(m["filename"]);srcU.append({"filename":m["filename"],"extrait":d[:3000]})
+                seenU.add(m["filename"]);srcU.append({"filename":m["filename"],"extrait":d[:800]})
         return JSONResponse({"answer": response_text, "sources": srcU})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
