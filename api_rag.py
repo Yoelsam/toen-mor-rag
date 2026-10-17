@@ -88,7 +88,7 @@ def ask_gemini(query, docs, metas, history=None):
         try:
             msg = anthropic_client.messages.create(
                 model="claude-sonnet-5-5",
-                max_tokens=8000,
+                max_tokens=12000,
                 messages=[{"role": "user", "content": prompt}]
             )
             text_blocks = [b.text for b in msg.content if hasattr(b, 'text') and b.type == "text"]
@@ -196,10 +196,23 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
         except Exception:
             hist_data = []
         answer = ask_gemini(query, docs, metas, history=hist_data)
+        # VERIFICATION: Haiku vérifie les citations
+        try:
+            verify_prompt = f"בדוק את התשובה הבאה. לכל טענה שמציינת [מקור X], ודא שהטענה נתמכת בפועל בקטע המצוטט. אם טענה אינה נתמכת, כתוב 'הערה:' ואחריה תיקון. אם הכל תקין, כתוב 'אושר'. תשובה:\n{answer[:3000]}\n\nמקורות:\n"
+            for i,(d,m) in enumerate(zip(docs[:5],metas[:5])):
+                verify_prompt += f"[מקור {i+1}: {m['filename']}] {d[:300]}\n"
+            vmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=500, messages=[{"role":"user","content":verify_prompt}])
+            vtext = next((b.text for b in vmsg.content if hasattr(b,'text')), "")
+            if "הערה:" in vtext:
+                corrections = [l.strip() for l in vtext.split("\n") if l.strip().startswith("הערה:")]
+                if corrections:
+                    answer += "\n\n**הערות דיוק:** " + " ".join(corrections)
+        except Exception:
+            pass
         seen=set();sources=[]
         for d,m in zip(docs,metas):
             if m["filename"] not in seen:
-                seen.add(m["filename"]);sources.append({"filename":m["filename"],"extrait":d[:800],"file_id":m.get("file_id","")})
+                seen.add(m["filename"]);sources.append({"filename":m["filename"],"extrait":d[:1500],"file_id":m.get("file_id","")})
                 if len(sources) >= 5: break
                 if len(sources) >= 5: break
         try:
@@ -217,7 +230,7 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
                 return
             try:
                 tp = open("/home/rag/taktzir_prompt.txt").read() + "\nשאלה שנשאלה: " + query + "\n\nמסמך:\n" + ext[:2000]
-                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=800, messages=[{"role":"user","content":tp}])
+                tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=1200, messages=[{"role":"user","content":tp}])
                 tblocks = [b.text for b in tmsg.content if hasattr(b,"text") and b.type=="text"]
                 raw = tblocks[0] if tblocks else ''
                 import re as _r
@@ -291,7 +304,7 @@ async def upload(files: list[UploadFile] = File(...), query: str = Form("")):
         seenU=set();srcU=[]
         for d,m in zip(docs,metas):
             if m["filename"] not in seenU:
-                seenU.add(m["filename"]);srcU.append({"filename":m["filename"],"extrait":d[:800]})
+                seenU.add(m["filename"]);srcU.append({"filename":m["filename"],"extrait":d[:1500]})
         return JSONResponse({"answer": response_text, "sources": srcU})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
