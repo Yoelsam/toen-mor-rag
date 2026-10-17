@@ -28,6 +28,13 @@ anthropic_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 embed_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="paraphrase-multilingual-MiniLM-L12-v2")
 client = chromadb.PersistentClient(path=CHROMA_DIR)
+# Charger le catalogue juridique
+try:
+    import json as _json2
+    _catalog = {x['filename']:x for x in _json2.load(open('/home/rag/index_juridique.json'))}
+except:
+    _catalog = {}
+
 collection = client.get_collection(COLLECTION_NAME)
 
 app = FastAPI()
@@ -177,7 +184,7 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
         docs, metas = search_docs(query)
         # RERANKING: demander a Haiku de classer les sources par pertinence
         try:
-            rerank_list = "\n".join(f"{i+1}. [{m['filename']}] {d[:300]}" for i,(d,m) in enumerate(zip(docs,metas)))
+            rerank_list = "\n".join(f"{i+1}. [{m['filename']}] {_catalog.get(m.get('filename',''),{}).get('type','?')}|{_catalog.get(m.get('filename',''),{}).get('erakha','?')}] {d[:200]}" for i,(d,m) in enumerate(zip(docs,metas)))
             rerank_prompt = f"שאלה משפטית: {query}\n\nלהלן {len(docs)} קטעים ממסמכים. בחר את 7 הקטעים שעונים ישירות על השאלה. כללים: 1) העדף פסקי דין ותקנות על פני מאמרים. 2) אל תבחר שני מסמכים שמצטטים את אותו פסק דין - בחר רק את המסמך שמביא את הציטוט המלא יותר. 3) התעלם מקטעים שאינם רלוונטיים. החזר רק את המספרים, מופרדים בפסיקים.\n\n{rerank_list}"
             rerank_msg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=60, messages=[{"role":"user","content":rerank_prompt}])
             rerank_text = next((b.text for b in rerank_msg.content if hasattr(b,'text')), "")
