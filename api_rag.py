@@ -42,12 +42,34 @@ def search_docs(query, n=30):
     results = collection.query(query_texts=[query], n_results=120)
     docs_all = results["documents"][0]
     metas_all = results["metadatas"][0]
+    
+    # BM25 reranking: chercher les termes exacts en hébreu
+    try:
+        from rank_bm25 import BM25Okapi
+        tokenized = [d.split() for d in docs_all]
+        bm25 = BM25Okapi(tokenized)
+        bm25_scores = bm25.get_scores(query.split())
+        # Combiner: score vectoriel (rang) + BM25
+        combined = []
+        for i, (d, m) in enumerate(zip(docs_all, metas_all)):
+            vec_score = 1.0 / (i + 1)  # rang inversé
+            bm25_score = bm25_scores[i] if i < len(bm25_scores) else 0
+            combined.append((vec_score + bm25_score * 0.3, d, m))
+        combined.sort(key=lambda x: -x[0])
+        docs_all = [x[1] for x in combined]
+        metas_all = [x[2] for x in combined]
+    except Exception:
+        pass
+    
     seen = set()
+    seen_content = set()
     mixed = []
     for d, m in zip(docs_all, metas_all):
         fn = m.get("filename", "")
-        if fn not in seen:
+        content_key = d[:200].strip()
+        if fn not in seen and content_key not in seen_content:
             seen.add(fn)
+            seen_content.add(content_key)
             mixed.append((d, m))
         if len(mixed) >= n:
             break
@@ -153,6 +175,21 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
         if NON_LEGAL.match(q) or len(q)<5 or heb<3 or (len(words)<2 and heb<6):
             return JSONResponse({"answer":"אנא הקלד שאלה משפטית ברורה","sources":[]})
         docs, metas = search_docs(query)
+        # RERANKING: demander a Haiku de classer les sources par pertinence
+        try:
+            rerank_list = "\n".join(f"{i+1}. [{m['filename']}] {d[:300]}" for i,(d,m) in enumerate(zip(docs,metas)))
+            rerank_prompt = f"שאלה משפטית: {query}\n\nלהלן {len(docs)} קטעים ממסמכים. בחר את 7 הקטעים שעונים ישירות על השאלה. כללים: 1) העדף פסקי דין ותקנות על פני מאמרים. 2) אל תבחר שני מסמכים שמצטטים את אותו פסק דין - בחר רק את המסמך שמביא את הציטוט המלא יותר. 3) התעלם מקטעים שאינם רלוונטיים. החזר רק את המספרים, מופרדים בפסיקים.\n\n{rerank_list}"
+            rerank_msg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=60, messages=[{"role":"user","content":rerank_prompt}])
+            rerank_text = next((b.text for b in rerank_msg.content if hasattr(b,'text')), "")
+            import re as _re
+            ranked_ids = [int(x.strip())-1 for x in _re.findall(r'\d+', rerank_text) if 0 <= int(x.strip())-1 < len(docs)]
+            seen_r = set()
+            ranked_ids = [x for x in ranked_ids if not (x in seen_r or seen_r.add(x))]
+            if len(ranked_ids) >= 5:
+                docs = [docs[i] for i in ranked_ids]
+                metas = [metas[i] for i in ranked_ids]
+        except Exception:
+            pass
         import json as _json
         try:
             hist_data = _json.loads(history) if history else []
@@ -743,7 +780,7 @@ document.querySelectorAll('.faq-q').forEach(function(q) {
 
 var selectedFiles=[];function showFiles(inp){var lbl=String.fromCharCode(1511,1489,1510,1497,1501);for(var j=0;j<inp.files.length;j++){if(selectedFiles.length<10){selectedFiles.push(inp.files[j]);}else{alert(String.fromCharCode(1504,1497,1514,1503,32,1506,1491,32,49,48,32)+lbl);break;}}inp.value="";renderFiles();}function renderFiles(){var box=document.getElementById("filelist");if(selectedFiles.length===0){box.innerHTML="";return;}var lbl=String.fromCharCode(1511,1489,1510,1497,1501);var h="<div style='color:var(--gold);font-weight:600;margin-bottom:6px;'>"+selectedFiles.length+" "+lbl+":</div>";for(var k=0;k<selectedFiles.length;k++){h+="<div style='background:var(--dark2);padding:6px 10px;border-radius:6px;margin-top:4px;font-size:0.85em;color:var(--text);display:flex;justify-content:space-between;align-items:center;'><span>"+selectedFiles[k].name+"</span><span onclick='removeFile("+k+")' style='cursor:pointer;color:#e74c3c;font-weight:bold;padding:0 8px;'>X</span></div>";}box.innerHTML=h;}function removeFile(i){selectedFiles.splice(i,1);renderFiles();}
 function toggleSrc(el){var p=el.querySelector(".src-ext");if(!p)return;var opening=p.style.display==="none";p.style.display=opening?"block":"none";if(opening&&window._lastQuery&&!p.dataset.highlighted){var q=window._lastQuery.replace(/[^א-תa-zA-Z0-9\s]/g,"");var words=q.split(/\s+/).filter(function(w){return w.length>2;});var h=p.innerHTML;words.forEach(function(w){var root=w.length>3?w.substring(0,3):w;var re=new RegExp("("+root+"[א-ת]*)","g");h=h.replace(re,"<mark style='background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;'>$1</mark>");});p.innerHTML=h;p.dataset.highlighted="1";}}
-function linkSrc(t){t=t.replace(/\[([^\]]+)\]\[(\u05de\u05e7\u05d5\u05e8 \d+)\]/g,function(m,ref,src){var n=src.match(/\d+/)[0];return '<a href="#" onclick="jumpSrc('+n+');return false;" style="color:#e74c3c;font-weight:700;text-decoration:none;border-bottom:1px dotted #e74c3c;">['+ref+']</a>';});return t.replace(/\[\u05de\u05e7\u05d5\u05e8 (\d+)[^\]]*\]/g,function(m,n){return '<a href="#" onclick="jumpSrc('+n+');return false;" style="color:#e74c3c;font-weight:700;text-decoration:none;border-bottom:1px dotted #e74c3c;">'+m+'</a>';});} function toggleExt(n){var d=document.getElementById('ext'+n);if(d){d.style.display=d.style.display==='none'?'block':'none';}} function jumpSrc(n){var items=document.querySelectorAll(".source-item");if(items.length>=n){var el=items[n-1];el.scrollIntoView({behavior:"smooth",block:"center"});var ext=el.querySelector(".src-ext");if(ext)ext.style.display="block";el.style.transition="background 0.3s";var orig=el.style.background;el.style.background="var(--gold-dim)";setTimeout(function(){el.style.background=orig;},1500);}}
+function linkSrc(t){t=t.replace(/\[([^\]]+)\]\[(\u05de\u05e7\u05d5\u05e8 \d+)\]/g,function(m,ref,src){var n=src.match(/\d+/)[0];return '<a href="#" onclick="jumpSrc('+n+');return false;" style="color:#e74c3c;font-weight:700;text-decoration:none;border-bottom:1px dotted #e74c3c;">['+ref+']</a>';});return t.replace(/\[\u05de\u05e7\u05d5\u05e8 (\d+)[^\]]*\]/g,function(m,n){return '<a href="#" onclick="jumpSrc('+n+');return false;" style="color:#e74c3c;font-weight:700;text-decoration:none;border-bottom:1px dotted #e74c3c;">'+m+'</a>';});} function toggleExt(n){var d=document.getElementById('ext'+n);if(d){d.style.display=d.style.display==='none'?'block':'none';}} function jumpSrc(n){var items=document.querySelectorAll(".source-item");if(items.length>=n){var el=items[n-1];el.scrollIntoView({behavior:"smooth",block:"center"});var ext=document.getElementById('ext'+n);if(ext)ext.style.display='block';el.style.transition="background 0.3s";var orig=el.style.background;el.style.background="var(--gold-dim)";setTimeout(function(){el.style.background=orig;},1500);}}
 function downloadWord(el){
   var txt=el.previousElementSibling?el.previousElementSibling.innerText:'';
   var blob=new Blob([txt],{type:'application/msword'});
