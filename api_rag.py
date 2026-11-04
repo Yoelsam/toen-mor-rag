@@ -10,7 +10,7 @@ from chromadb.utils import embedding_functions
 from google import genai
 import anthropic
 from fastapi import FastAPI, UploadFile, File, Form, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import io
 from docx import Document
@@ -114,13 +114,15 @@ def ask_gemini(query, docs, metas, history=None):
     if history:
         for h in history[-4:]:
             history_text += f"\n\u05E9\u05D0\u05DC\u05D4 \u05E7\u05D5\u05D3\u05DE\u05EA: {h['q']}\n\u05EA\u05E9\u05D5\u05D1\u05D4 \u05E7\u05D5\u05D3\u05DE\u05EA: {h['a'][:500]}\n---"
-    prompt = open("/home/rag/system_prompt.txt").read() + "\n" + history_text + "\n\n" + context + "\n\nשאלה: " + query + "\n\nתשובה מפורטת ומועילה:"
+    system = open("/home/rag/system_prompt.txt").read()
+    user_msg = history_text + "\n\n" + context + "\n\nשאלה: " + query + "\n\nתשובה מפורטת ומועילה:"
     for attempt in range(3):
         try:
             msg = anthropic_client.messages.create(
                 model="claude-sonnet-5-5",
                 max_tokens=15000,
-                messages=[{"role": "user", "content": prompt}]
+                system=system,
+                messages=[{"role": "user", "content": user_msg}]
             )
             text_blocks = [b.text for b in msg.content if hasattr(b, 'text') and b.type == "text"]
             return text_blocks[0] if text_blocks else str(msg.content)
@@ -144,6 +146,33 @@ def get_drive_service():
     if creds.expired and creds.refresh_token:
         creds.refresh(GoogleRequest())
     return build("drive", "v3", credentials=creds)
+
+def highlight_text_html(text: str, query: str) -> str:
+    """Convert plain text to HTML paragraphs with query-term highlighting."""
+    if not text:
+        return ""
+    import html as html_mod
+    paragraphs = text.split("\n")
+    # Extract Hebrew roots from query for highlighting
+    highlight_roots = []
+    if query:
+        words = re.sub(r'[^א-תa-zA-Z0-9\s]', '', query).split()
+        for w in words:
+            if len(w) > 2:
+                root = w[:3] if len(w) > 3 else w
+                highlight_roots.append(root)
+    html_parts = []
+    for para in paragraphs:
+        para = para.strip()
+        if not para:
+            continue
+        safe = html_mod.escape(para)
+        # Apply highlighting
+        for root in highlight_roots:
+            pattern = re.compile(r'(' + re.escape(root) + r'[א-ת]*)', re.IGNORECASE)
+            safe = pattern.sub(r'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">\1</mark>', safe)
+        html_parts.append(f'<p style="margin:0 0 12px 0;line-height:1.9;text-align:right;">{safe}</p>')
+    return "\n".join(html_parts)
 
 @app.get("/api/doc/{file_id}")
 async def get_doc(file_id: str, query: str = ""):
@@ -177,21 +206,11 @@ async def get_doc(file_id: str, query: str = ""):
                     text = "\n".join(page.extract_text() or "" for page in pdf.pages)
             except Exception as e:
                 text = "[שגיאה: " + str(e) + "]"
-        summary = ""
-        if query and text and len(text) > 50:
-            try:
-                sum_prompt = open('/home/rag/sum_prompt.txt').read() + "\n\nשאלה: " + query + "\n\nמסמך:\n" + text[:8000]
-                msg = anthropic_client.messages.create(
-                    model="claude-sonnet-5-5",
-                    max_tokens=2048,
-                    messages=[{"role": "user", "content": sum_prompt}]
-                )
-                summary = next(b.text for b in msg.content if b.type == "text")
-            except Exception:
-                summary = ""
-        return {"filename": name, "text": text, "query": query, "summary": summary}
+        # Return both raw text and server-side highlighted HTML
+        html_content = highlight_text_html(text, query)
+        return {"filename": name, "text": text, "html": html_content, "query": query, "summary": ""}
     except Exception as e:
-        return {"error": str(e), "filename": "", "text": "", "query": query}
+        return {"error": str(e), "filename": "", "text": "", "html": "", "query": query}
 
 @app.post("/api/search")
 async def search(request: Request, query: str = Form(...), history: str = Form("[]")):
@@ -227,19 +246,6 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
         except Exception:
             hist_data = []
         answer = ask_gemini(query, docs, metas, history=hist_data)
-        # VERIFICATION: Haiku vérifie les citations
-        try:
-            verify_prompt = f"בדוק את התשובה הבאה. לכל טענה שמציינת [מקור X], ודא שהטענה נתמכת בפועל בקטע המצוטט. אם טענה אינה נתמכת, כתוב 'הערה:' ואחריה תיקון. אם הכל תקין, כתוב 'אושר'. תשובה:\n{answer[:3000]}\n\nמקורות:\n"
-            for i,(d,m) in enumerate(zip(docs[:5],metas[:5])):
-                verify_prompt += f"[מקור {i+1}: {m['filename']}] {d[:300]}\n"
-            vmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=500, messages=[{"role":"user","content":verify_prompt}])
-            vtext = next((b.text for b in vmsg.content if hasattr(b,'text')), "")
-            if "הערה:" in vtext:
-                corrections = [l.strip() for l in vtext.split("\n") if l.strip().startswith("הערה:")]
-                if corrections:
-                    answer += "\n\n**הערות דיוק:** " + " ".join(corrections)
-        except Exception:
-            pass
         seen=set();sources=[]
         for d,m in zip(docs,metas):
             if m["filename"] not in seen:
@@ -247,16 +253,28 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
                 _meta = _catalog.get(m["filename"],{})
                 sources.append({"filename":m["filename"],"extrait":d[:1500],"file_id":m.get("file_id",""),"chunk":m.get("chunk",0),"doc_type":_meta.get("type",""),"erakha":_meta.get("erakha",""),"tik":_meta.get("tik",""),"doc_date":_meta.get("date",""),"doc_judges":_meta.get("judges","")})
                 if len(sources) >= 5: break
-                if len(sources) >= 5: break
         try:
             user = auth.get_current_user(request)
             if user and user.get("allowed"):
                 database.save_search(user["email"], query, answer, sources)
         except Exception:
             pass
-        # Generer un taktzir pour chaque source
-        # Generer taktzirim en parallele avec threads
+        # Run verification + taktzir in PARALLEL
         import concurrent.futures
+        def run_verification():
+            try:
+                verify_prompt = f"בדוק את התשובה הבאה. לכל טענה שמציינת [מקור X], ודא שהטענה נתמכת בפועל בקטע המצוטט. אם טענה אינה נתמכת, כתוב 'הערה:' ואחריה תיקון. אם הכל תקין, כתוב 'אושר'. תשובה:\n{answer[:3000]}\n\nמקורות:\n"
+                for i,(d,m) in enumerate(zip(docs[:5],metas[:5])):
+                    verify_prompt += f"[מקור {i+1}: {m['filename']}] {d[:300]}\n"
+                vmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=500, messages=[{"role":"user","content":verify_prompt}])
+                vtext = next((b.text for b in vmsg.content if hasattr(b,'text')), "")
+                if "הערה:" in vtext:
+                    corrections = [l.strip() for l in vtext.split("\n") if l.strip().startswith("הערה:")]
+                    if corrections:
+                        return "\n\n**הערות דיוק:** " + " ".join(corrections)
+            except Exception:
+                pass
+            return ""
         def gen_taktzir(src):
             ext = src.get("extrait", "")
             if not ext or len(ext) < 50:
@@ -284,12 +302,193 @@ async def search(request: Request, query: str = Form(...), history: str = Form("
                 src["doc_type"] = "PDF"
             else:
                 src["doc_type"] = "מסמך"
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
-            ex.map(gen_taktzir, sources[:5])
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
+            verify_future = ex.submit(run_verification)
+            list(ex.map(gen_taktzir, sources[:5]))
+            correction = verify_future.result(timeout=15)
+            if correction:
+                answer += correction
 
         return JSONResponse({"answer": answer, "sources": sources})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
+# ===== STREAMING SSE ENDPOINT =====
+import json as _json_module
+
+def ask_anthropic_stream(query, docs, metas, history=None):
+    """Generator that yields SSE events with streaming tokens from Anthropic."""
+    context = "\n\n".join(f"[מקור {i+1}: {m['filename']}]\n{d}" for i,(d,m) in enumerate(zip(docs,metas)))
+    history_text = ""
+    if history:
+        for h in history[-4:]:
+            history_text += f"\nשאלה קודמת: {h['q']}\nתשובה קודמת: {h['a'][:500]}\n---"
+    system = open("/home/rag/system_prompt.txt").read()
+    user_msg = history_text + "\n\n" + context + "\n\nשאלה: " + query + "\n\nתשובה מפורטת ומועילה:"
+    for attempt in range(3):
+        try:
+            with anthropic_client.messages.stream(
+                model="claude-sonnet-5-5",
+                max_tokens=15000,
+                system=system,
+                messages=[{"role": "user", "content": user_msg}]
+            ) as stream:
+                for text in stream.text_stream:
+                    yield text
+            return
+        except Exception as e:
+            if attempt < 2 and ("503" in str(e) or "UNAVAILABLE" in str(e) or "429" in str(e)):
+                time.sleep(5)
+                continue
+            raise
+
+@app.post("/api/search-stream")
+async def search_stream(request: Request, query: str = Form(...), history: str = Form("[]")):
+    try:
+        q = query.strip()
+        heb = sum(1 for c in q if 0x05D0 <= ord(c) <= 0x05EA)
+        words = [w for w in q.split() if len(w) >= 2]
+        NON_LEGAL = re.compile(
+            r"^(שלום|היי|הי|בוקר טוב|ערב טוב|לילה טוב|מה שלומך|מה נשמע|תודה|ביי|להתראות|בסדר|אוקי|כן|לא|ok|yes|no|hi|hello|bye|merci|bonjour|bonsoir)[\s!?.]*$",
+            re.IGNORECASE
+        )
+        if NON_LEGAL.match(q) or len(q) < 5 or heb < 3 or (len(words) < 2 and heb < 6):
+            async def err_gen():
+                yield f"data: {_json_module.dumps({'type':'sources','sources':[]})}\n\n"
+                yield f"data: {_json_module.dumps({'type':'token','text':'אנא הקלד שאלה משפטית ברורה'})}\n\n"
+                yield f"data: {_json_module.dumps({'type':'done'})}\n\n"
+            return StreamingResponse(err_gen(), media_type="text/event-stream")
+
+        docs, metas = search_docs(query)
+        # RERANKING with Haiku
+        try:
+            rerank_list = "\n".join(f"{i+1}. [{m['filename']}] {_catalog.get(m.get('filename',''),{}).get('type','?')}|{_catalog.get(m.get('filename',''),{}).get('erakha','?')}] {d[:200]}" for i,(d,m) in enumerate(zip(docs,metas)))
+            rerank_prompt = f"שאלה משפטית: {query}\n\nלהלן {len(docs)} קטעים ממסמכים. בחר את 7 הקטעים שעונים ישירות על השאלה. כללים: 1) העדף פסקי דין ותקנות על פני מאמרים. 2) אל תבחר שני מסמכים שמצטטים את אותו פסק דין - בחר רק את המסמך שמביא את הציטוט המלא יותר. 3) התעלם מקטעים שאינם רלוונטיים. החזר רק את המספרים, מופרדים בפסיקים.\n\n{rerank_list}"
+            rerank_msg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=60, messages=[{"role":"user","content":rerank_prompt}])
+            rerank_text = next((b.text for b in rerank_msg.content if hasattr(b,'text')), "")
+            import re as _re
+            ranked_ids = [int(x.strip())-1 for x in _re.findall(r'\d+', rerank_text) if 0 <= int(x.strip())-1 < len(docs)]
+            seen_r = set()
+            ranked_ids = [x for x in ranked_ids if not (x in seen_r or seen_r.add(x))]
+            if len(ranked_ids) >= 5:
+                docs = [docs[i] for i in ranked_ids]
+                metas = [metas[i] for i in ranked_ids]
+        except Exception:
+            pass
+
+        import json as _json
+        try:
+            hist_data = _json.loads(history) if history else []
+        except Exception:
+            hist_data = []
+
+        # Build sources
+        seen = set(); sources = []
+        for d, m in zip(docs, metas):
+            if m["filename"] not in seen:
+                seen.add(m["filename"])
+                _meta = _catalog.get(m["filename"], {})
+                sources.append({"filename": m["filename"], "extrait": d[:1500], "file_id": m.get("file_id",""), "chunk": m.get("chunk",0), "doc_type": _meta.get("type",""), "erakha": _meta.get("erakha",""), "tik": _meta.get("tik",""), "doc_date": _meta.get("date",""), "doc_judges": _meta.get("judges","")})
+                if len(sources) >= 5: break
+
+        # Save to history
+        try:
+            user = auth.get_current_user(request)
+        except Exception:
+            user = None
+
+        def generate_sse():
+            # 1) Send sources first
+            yield f"data: {_json_module.dumps({'type':'sources','sources':sources}, ensure_ascii=False)}\n\n"
+
+            # 2) Stream AI answer tokens
+            full_answer = []
+            try:
+                for token in ask_anthropic_stream(query, docs, metas, history=hist_data):
+                    full_answer.append(token)
+                    yield f"data: {_json_module.dumps({'type':'token','text':token}, ensure_ascii=False)}\n\n"
+            except Exception as e:
+                yield f"data: {_json_module.dumps({'type':'error','message':str(e)}, ensure_ascii=False)}\n\n"
+                return
+
+            answer_text = "".join(full_answer)
+
+            # 3) Run verification + taktzir in parallel
+            import concurrent.futures
+            def run_verification():
+                try:
+                    verify_prompt = f"בדוק את התשובה הבאה. לכל טענה שמציינת [מקור X], ודא שהטענה נתמכת בפועל בקטע המצוטט. אם טענה אינה נתמכת, כתוב 'הערה:' ואחריה תיקון. אם הכל תקין, כתוב 'אושר'. תשובה:\n{answer_text[:3000]}\n\nמקורות:\n"
+                    for i,(d,m) in enumerate(zip(docs[:5],metas[:5])):
+                        verify_prompt += f"[מקור {i+1}: {m['filename']}] {d[:300]}\n"
+                    vmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=500, messages=[{"role":"user","content":verify_prompt}])
+                    vtext = next((b.text for b in vmsg.content if hasattr(b,'text')), "")
+                    if "הערה:" in vtext:
+                        corrections = [l.strip() for l in vtext.split("\n") if l.strip().startswith("הערה:")]
+                        if corrections:
+                            return "\n\n**הערות דיוק:** " + " ".join(corrections)
+                except Exception:
+                    pass
+                return ""
+
+            def gen_taktzir(src):
+                ext = src.get("extrait", "")
+                if not ext or len(ext) < 50:
+                    return
+                try:
+                    tp = open("/home/rag/taktzir_prompt.txt").read() + "\nשאלה שנשאלה: " + query + "\n\nמסמך:\n" + ext[:2000]
+                    tmsg = anthropic_client.messages.create(model="claude-haiku-4-5-20251001", max_tokens=1500, messages=[{"role":"user","content":tp}])
+                    tblocks = [b.text for b in tmsg.content if hasattr(b,"text") and b.type=="text"]
+                    raw = tblocks[0] if tblocks else ''
+                    import re as _r
+                    jm = _r.search(r'שופטים:\s*(.+)', raw)
+                    tm = _r.search(r'מספר תיק:\s*(.+)', raw)
+                    tkm = _r.search(r'תקציר:\s*(.+)', raw, _r.DOTALL)
+                    src['judges'] = jm.group(1).strip() if jm and 'לא צוין' not in jm.group(1) else ''
+                    src['tik'] = tm.group(1).strip() if tm and 'לא צוין' not in tm.group(1) else ''
+                    src['taktzir'] = tkm.group(1).strip() if tkm else raw
+                except Exception:
+                    src["taktzir"] = ""
+                fn = src["filename"].lower()
+                if any(w in fn for w in ["פסק", "פס_ד", "החלט"]):
+                    src["doc_type"] = "פסק דין"
+                elif any(w in fn for w in ["מאמר", "article"]):
+                    src["doc_type"] = "מאמר"
+                elif fn.endswith(".pdf"):
+                    src["doc_type"] = "PDF"
+                else:
+                    src["doc_type"] = "מסמך"
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
+                verify_future = ex.submit(run_verification)
+                list(ex.map(gen_taktzir, sources[:5]))
+                correction = verify_future.result(timeout=15)
+
+            # 4) Send correction if any
+            if correction:
+                yield f"data: {_json_module.dumps({'type':'correction','text':correction}, ensure_ascii=False)}\n\n"
+
+            # 5) Send updated sources with taktzir
+            yield f"data: {_json_module.dumps({'type':'sources_update','sources':sources}, ensure_ascii=False)}\n\n"
+
+            # 6) Save to DB
+            try:
+                if user and user.get("allowed"):
+                    database.save_search(user["email"], query, answer_text + (correction or ""), sources)
+            except Exception:
+                pass
+
+            # 7) Done signal
+            yield f"data: {_json_module.dumps({'type':'done'})}\n\n"
+
+        return StreamingResponse(generate_sse(), media_type="text/event-stream", headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive"
+        })
+    except Exception as e:
+        async def err_gen():
+            yield f"data: {_json_module.dumps({'type':'error','message':str(e)})}\n\n"
+        return StreamingResponse(err_gen(), media_type="text/event-stream")
 
 @app.post("/api/upload")
 async def upload(files: list[UploadFile] = File(...), query: str = Form("")):
@@ -826,7 +1025,41 @@ document.querySelectorAll('.faq-q').forEach(function(q) {
 
 var selectedFiles=[];function showFiles(inp){var lbl=String.fromCharCode(1511,1489,1510,1497,1501);for(var j=0;j<inp.files.length;j++){if(selectedFiles.length<10){selectedFiles.push(inp.files[j]);}else{alert(String.fromCharCode(1504,1497,1514,1503,32,1506,1491,32,49,48,32)+lbl);break;}}inp.value="";renderFiles();}function renderFiles(){var box=document.getElementById("filelist");if(selectedFiles.length===0){box.innerHTML="";return;}var lbl=String.fromCharCode(1511,1489,1510,1497,1501);var h="<div style='color:var(--gold);font-weight:600;margin-bottom:6px;'>"+selectedFiles.length+" "+lbl+":</div>";for(var k=0;k<selectedFiles.length;k++){h+="<div style='background:var(--dark2);padding:6px 10px;border-radius:6px;margin-top:4px;font-size:0.85em;color:var(--text);display:flex;justify-content:space-between;align-items:center;'><span>"+selectedFiles[k].name+"</span><span onclick='removeFile("+k+")' style='cursor:pointer;color:#e67e22;font-weight:bold;padding:0 8px;'>X</span></div>";}box.innerHTML=h;}function removeFile(i){selectedFiles.splice(i,1);renderFiles();}
 function toggleSrc(el){var p=el.querySelector(".src-ext");if(!p)return;var opening=p.style.display==="none";p.style.display=opening?"block":"none";if(opening&&window._lastQuery&&!p.dataset.highlighted){var q=window._lastQuery.replace(/[^א-תa-zA-Z0-9\s]/g,"");var words=q.split(/\s+/).filter(function(w){return w.length>2;});var h=p.innerHTML;words.forEach(function(w){var root=w.length>3?w.substring(0,3):w;var re=new RegExp("("+root+"[א-ת]*)","g");h=h.replace(re,"<mark style='background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;'>$1</mark>");});p.innerHTML=h;p.dataset.highlighted="1";}}
-function linkSrc(t){t=t.replace(/\[([^\]]+)\]\[(\u05de\u05e7\u05d5\u05e8 \d+)\]/g,function(m,ref,src){var n=src.match(/\d+/)[0];return '<a href="#" onclick="event.preventDefault();jumpSrc('+n+');" style="color:#e67e22;font-weight:700;text-decoration:none;border-bottom:1px dotted #e67e22;">['+ref+']</a>';});return t.replace(/\[\u05de\u05e7\u05d5\u05e8 (\d+)[^\]]*\]/g,function(m,n){return '<a href="#" onclick="event.preventDefault();jumpSrc('+n+');" style="color:#e67e22;font-weight:700;text-decoration:none;border-bottom:1px dotted #e67e22;">'+m+'</a>';});} function toggleExt(n){var d=document.getElementById('ext'+n);if(d){d.style.display=d.style.display==='none'?'block':'none';}} function jumpSrc(n){if(window._fileIds&&window._fileIds[n]){var pg=window._chunkIds&&window._chunkIds[n]?Math.floor(window._chunkIds[n]/2)+1:1;window.open('https://drive.google.com/file/d/'+window._fileIds[n]+'/view#page='+pg,'_blank');}var items=document.querySelectorAll(".source-item");if(items.length>=n){var el=items[n-1];el.scrollIntoView({behavior:"smooth",block:"center"});var ext=document.getElementById('ext'+n);if(ext)ext.style.display='block';el.style.transition="background 0.3s";var orig=el.style.background;el.style.background="var(--gold-dim)";setTimeout(function(){el.style.background=orig;},1500);}}
+function linkSrc(t){
+  // Pattern 1: [case ref][\u05de\u05e7\u05d5\u05e8 X] \u2192 clickable ref text + superscript citation number
+  t=t.replace(/\[([^\]]+)\]\[(\u05de\u05e7\u05d5\u05e8 \d+)\]/g,function(m,ref,src){
+    var n=src.match(/\d+/)[0];
+    return '<a href="#" onclick="event.preventDefault();jumpSrc('+n+');" style="color:#e67e22;font-weight:700;text-decoration:none;border-bottom:1px dotted #e67e22;" title="'+src+'">['+ref+']</a><sup onclick="event.preventDefault();jumpSrc('+n+');" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.65em;font-weight:800;margin:0 2px;padding:0 3px;vertical-align:super;line-height:1;" title="\u05e6\u05e4\u05d4 \u05d1\u05de\u05e7\u05d5\u05e8 '+n+'">'+n+'</sup>';
+  });
+  // Pattern 2: [\u05de\u05e7\u05d5\u05e8 X] alone \u2192 superscript citation badge
+  t=t.replace(/\[\u05de\u05e7\u05d5\u05e8 (\d+)[^\]]*\]/g,function(m,n){
+    return '<sup onclick="event.preventDefault();jumpSrc('+n+');" style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.65em;font-weight:800;margin:0 2px;padding:0 3px;vertical-align:super;line-height:1;" title="\u05e6\u05e4\u05d4 \u05d1\u05de\u05e7\u05d5\u05e8 '+n+'">'+n+'</sup>';
+  });
+  return t;
+}
+function toggleExt(n){var d=document.getElementById('ext'+n);if(d){d.style.display=d.style.display==='none'?'block':'none';}}
+function jumpSrc(n){
+  // First scroll to the source card and highlight it
+  var items=document.querySelectorAll(".source-item");
+  if(items.length>=n){
+    var el=items[n-1];
+    el.scrollIntoView({behavior:"smooth",block:"center"});
+    var ext=document.getElementById('ext'+n);
+    if(ext)ext.style.display='block';
+    el.style.transition="background 0.3s";
+    var orig=el.style.background;
+    el.style.background="var(--gold-dim)";
+    setTimeout(function(){el.style.background=orig;},2000);
+  }
+  // Also open the document viewer if file_id is available
+  if(window._fileIds&&window._fileIds[n]){
+    var fid=window._fileIds[n];
+    var btn=document.querySelector('[data-fileid="'+fid+'"]');
+    if(btn){
+      openVwr(fid, btn.dataset.filename||'', btn.dataset.driveurl||('https://drive.google.com/file/d/'+fid+'/view'), btn.dataset.extrait||'');
+    }
+  }
+}
 function downloadWord(el){
   var txt=el.previousElementSibling?el.previousElementSibling.innerText:'';
   var blob=new Blob([txt],{type:'application/msword'});
@@ -861,6 +1094,33 @@ function scrollToQuery() {
   var qa = document.getElementById('query');
   if(qa){ qa.scrollIntoView({behavior:'smooth'}); qa.focus(); }
 }
+function renderSourcesHtml(sources) {
+  var html='<div class="sources-title">מקורות:</div>';
+  sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;
+    var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);
+    html+='<div class="source-item" id="src-item-'+num+'">'
+      +' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename
+      +'<div style="margin-top:4px;">'
+      +(s.file_id?'<a href="#" data-fileid="'+s.file_id+'" data-filename="'+s.filename.replace(/"/g,'&quot;')+'" data-driveurl="https://drive.google.com/file/d/'+s.file_id+'/view" data-extrait="'+(s.extrait||'').substring(0,300).replace(/"/g,'&quot;')+'" style="color:var(--gold);font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;">צפה במסמך 📄</a>'
+       :'<a href="https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename)+'" target="_blank" style="color:var(--gold);font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;">חפש ב-Drive ☁️</a>')
+      +'<a href="https://wa.me/?text='+encodeURIComponent(s.filename+' - '+driveLink)+'" target="_blank" style="color:#25d366;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #25d366;padding:2px 6px;border-radius:4px;">WhatsApp</a>'
+      +'<a href="mailto:?subject='+encodeURIComponent(s.filename)+'&body='+encodeURIComponent(driveLink)+'" style="color:#3498db;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #3498db;padding:2px 6px;border-radius:4px;">Email</a>'
+      +'</div>'
+      +(s.doc_type?'<div style="font-size:0.75em;color:#e67e22;font-weight:700;margin-top:4px;">'+(s.doc_type||'')+(s.erakha?' | '+s.erakha:'')+(s.tik?' | תיק '+s.tik:'')+(s.doc_date?' | '+s.doc_date:'')+'</div>':'')
+      +(s.taktzir?'<div style="font-size:0.85em;color:var(--text);margin-top:6px;line-height:1.6;direction:rtl;background:rgba(255,213,0,0.08);border-radius:6px;padding:8px 12px;">'+(s.judges?'<div style="color:var(--gold);font-weight:700;margin-bottom:4px;">שופטים: '+s.judges+'</div>':'')+(s.tik?'<div style="color:var(--text-dim);font-size:0.9em;margin-bottom:4px;">'+s.tik+'</div>':'')+'<div>'+s.taktzir+'</div></div>':'')
+      +'<div id="ext'+num+'" style="display:none;margin-top:8px;font-size:0.9em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#e67e22;color:#fff;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">📄 קטע מתוך המסמך המקורי</div><br>'+(s.extrait||'').split(String.fromCharCode(10)).join('<br>')+'</div>'
+      +'</div>';
+  });
+  return html;
+}
+
+function formatAnswerHtml(text) {
+  return linkSrc(text.replace(/\[\[/g,'[').replace(/\]\]/g,']'))
+    .split(String.fromCharCode(10)).join("<br>")
+    .replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>")
+    .replace(/---/g,"<hr>");
+}
+
 async function search() {
   var rawQuery = document.getElementById('query').value;window._lastQuery=rawQuery;
   var query = rawQuery;
@@ -870,48 +1130,110 @@ async function search() {
   var fileList = selectedFiles;
   if (!rawQuery && !fileList.length) { alert('הקלד שאלה או העלה קובץ'); return; }
   document.getElementById('loading').style.display='block';
-  
-  
-  try {
-    let resp;
-    if (fileList.length) {
+
+  // If files uploaded, use the old /api/upload (non-streaming)
+  if (fileList.length) {
+    try {
       const fd = new FormData();
       for(var fi=0;fi<fileList.length;fi++){fd.append("files",fileList[fi]);}
       fd.append('query', query);
-      resp = await fetch('/api/upload', {method:'POST', body:fd});
-    } else { var qa=document.getElementById("query"); if(qa){qa.placeholder="05E905D005DC05D4 1: 05D405E705DC05D3 05D005EA 05E905D005DC05EA05DA 05D405DE05E905E405D805D905EA 05DB05D005DF...";}
-      const fd = new FormData();
-      fd.append('query', query);
-      fd.append('history', JSON.stringify(chatHistory));
-      resp = await fetch('/api/search', {method:'POST', body:fd});
-    }
-    const data = await resp.json();
+      var resp = await fetch('/api/upload', {method:'POST', body:fd});
+      var data = await resp.json();
+      document.getElementById('loading').style.display='none';
+      if (data.error) { alert('שגיאה: '+data.error); return; }
+      chatHistory.push({q: rawQuery, a: data.answer}); updateChatIndicator();
+      document.getElementById('query').value = '';
+      var conv = document.getElementById('conversation'); conv.style.display='block';
+      var turnDiv = document.createElement('div');
+      turnDiv.style.cssText='margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:20px;';
+      window._fileIds={};window._chunkIds={};(data.sources||[]).forEach(function(s,i){if(s.file_id)window._fileIds[i+1]=s.file_id;if(s.chunk!==undefined)window._chunkIds[i+1]=s.chunk;});
+      var qNum = chatHistory.length;
+      var qDiv = '<div style="background:var(--dark2);border-right:3px solid var(--gold);padding:10px 14px;border-radius:8px;margin-bottom:12px;color:var(--text-dim);font-size:0.9em;"><span style="color:var(--gold);font-weight:700;margin-left:8px;">שאלה '+qNum+':</span> ' + rawQuery.replace(/</g,"&lt;") + '</div>';
+      var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;"><button class="btn-pdf" onclick="exportPDF()">&#x1F4C4; PDF</button><button class="btn-pdf" onclick="copyAnswer()" title="העתק">&#x1F4CB;</button><button class="btn-pdf" onclick="printAnswer()" title="הדפס">&#x1F5A8;&#xFE0F;</button></div></div>';
+      var ansBody = '<button onclick="readAnswer()" style="background:none;border:1px solid #ffd500;color:#ffd500;border-radius:6px;padding:3px 8px;font-size:0.9em;cursor:pointer;float:left;">🔊 קרא</button>' + formatAnswerHtml(data.answer);
+      var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
+      turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc;
+      if (data.sources) { var srcDiv = document.createElement('div'); srcDiv.innerHTML = renderSourcesHtml(data.sources); turnDiv.appendChild(srcDiv); }
+      conv.appendChild(turnDiv);
+      window.scrollTo({top:0,behavior:"smooth"});
+    } catch(e) { document.getElementById('loading').style.display='none'; alert('שגיאה: '+e.message); }
+    return;
+  }
+
+  // === STREAMING SSE for text queries ===
+  try {
+    const fd = new FormData();
+    fd.append('query', query);
+    fd.append('history', JSON.stringify(chatHistory));
+    var resp = await fetch('/api/search-stream', {method:'POST', body:fd});
     document.getElementById('loading').style.display='none';
-    if (data.error) { alert('שגיאה: '+data.error); return; }
-    chatHistory.push({q: rawQuery, a: data.answer}); updateChatIndicator();
-    document.getElementById('query').value = '';
-    var conv = document.getElementById('conversation'); if(!conv){alert("erreur: div conversation introuvable"); return;}
-    conv.style.display='block';
+
+    var conv = document.getElementById('conversation'); conv.style.display='block';
     var turnDiv = document.createElement('div');
     turnDiv.style.cssText='margin-bottom:28px;border-bottom:1px solid var(--border);padding-bottom:20px;';
-    var qNum = chatHistory.length;
+    var qNum = chatHistory.length + 1;
     var qDiv = '<div style="background:var(--dark2);border-right:3px solid var(--gold);padding:10px 14px;border-radius:8px;margin-bottom:12px;color:var(--text-dim);font-size:0.9em;"><span style="color:var(--gold);font-weight:700;margin-left:8px;">שאלה '+qNum+':</span> ' + rawQuery.replace(/</g,"&lt;") + '</div>';
-    window._fileIds={};window._chunkIds={};data.sources.forEach(function(s,i){if(s.file_id)window._fileIds[i+1]=s.file_id;if(s.chunk!==undefined)window._chunkIds[i+1]=s.chunk;});var ansBody = '<button onclick="readAnswer()" style="background:none;border:1px solid #ffd500;color:#ffd500;border-radius:6px;padding:3px 8px;font-size:0.9em;cursor:pointer;float:left;">🔊 קרא</button>' + linkSrc(data.answer.replace(/\[\[/g,'[').replace(/\]\]/g,']')).split(String.fromCharCode(10)).join("<br>").replace(/[*][*]([^*]+)[*][*]/g,"<strong>$1</strong>").replace(/---/g,"<hr>").replace(/<strong>תמצית:<\/strong>/g,"<span style='background:#ffd500;color:#0a0e14;border-radius:4px;padding:2px 8px;font-weight:700;margin-left:6px;'>📋 תמצית</span> <button onclick='readAnswer()' style='background:none;border:1px solid #ffd500;color:#ffd500;border-radius:6px;padding:3px 8px;font-size:1em;cursor:pointer;'>🔊 קרא</button>");
-    var disc = '<div class="disclaimer">⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.</div>';
-    var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;"><button class="btn-pdf" onclick="exportPDF()">&#x1F4C4; PDF</button><button class="btn-pdf" onclick="copyAnswer()" title="העתק">&#x1F4CB;</button><button class="btn-pdf" onclick="printAnswer()" title="הדפס">&#x1F5A8;&#xFE0F;</button><button class="btn-pdf" onclick="shareWhatsApp()" style="color:#25d366;border-color:#25d366;" title="WhatsApp">&#x1F4AC;</button><button class="btn-pdf" onclick="shareEmail()" title="Email">&#x1F4E7;</button><button class="btn-pdf" onclick="shareFacebook()" style="color:#1877f2;border-color:#1877f2;" title="Facebook">&#x1F4D8;</button><button class="btn-pdf" onclick="shareTwitter()" style="color:#000;border-color:#000;" title="X">𝕏</button><button class="btn-pdf" onclick="shareLinkedIn()" style="color:#0077b5;border-color:#0077b5;" title="LinkedIn">&#x1F4BC;</button><button class="btn-pdf" onclick="saveToDrive()" style="color:#fbbc04;border-color:#fbbc04;" title="Google Drive">&#x2601;&#xFE0F;</button></div></div>';
-    var draftBtnHtml = '';
-    var suiteBtn = '<div style="margin-top:12px;text-align:center;"><button onclick="scrollToQuery()" style="background:linear-gradient(135deg,#1a5c3a,#0f3d26);border:2px solid #ffd500;color:#ffd500;padding:12px 22px;border-radius:8px;font-size:1.05em;font-weight:700;cursor:pointer;animation:blink-gold 1.2s ease-in-out infinite;">שאלה בהמשך ↓</button></div>';
-    hdr = hdr.replace('</div>', draftBtnHtml + '</div>');
-    turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body">' + ansBody + '</div>' + disc + suiteBtn;
-    if (data.sources) {
-      let html='<div class="sources-title">מקורות:</div>';
-      data.sources.forEach(function(s,idx){var ext=s.extrait||'';var num=idx+1;var heb=(ext.match(/[א-ת]/g)||[]).length;var showExt=false;if(showExt&&window._lastQuery){var _words=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_words.forEach(function(w){var _root=w.length>3?w.substring(0,3):w;var _re=new RegExp('('+_root+'[\u05D0-\u05EA]*)','g');ext=ext.replace(_re,'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}var driveLink=s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'https://drive.google.com/drive/folders/1wePOCt8HgsSQRw0m1nKPcu6iHMz5lERs?q='+encodeURIComponent(s.filename);html+='<div class="source-item" id="src-item-'+num+'"'+(showExt?' onclick="toggleSrc(this)" style="cursor:pointer;"':'')+'>'+' <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--gold);color:#0a0e14;border-radius:50%;font-size:0.8em;font-weight:800;margin-left:8px;flex-shrink:0;">'+num+'</span> '+s.filename+'<div style="margin-top:4px;">'+'<a href="'+(s.file_id?'https://drive.google.com/file/d/'+s.file_id+'/view':'#')+'" target="_blank" style="color:var(--gold);font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid var(--gold);padding:2px 6px;border-radius:4px;">צפה במסמך ☁️</a><a href="#" onclick="event.preventDefault();toggleExt('+num+');" style="color:#e67e22;font-size:0.8em;margin-right:4px;text-decoration:none;display:none;">צפה בקטע</a><a href="https://wa.me/?text='+encodeURIComponent(s.filename+' - '+driveLink)+'" target="_blank" onclick="event.stopPropagation()" style="color:#25d366;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #25d366;padding:2px 6px;border-radius:4px;">WhatsApp</a><a href="mailto:?subject='+encodeURIComponent(s.filename)+'&body='+encodeURIComponent(driveLink)+'" onclick="event.stopPropagation()" style="color:#3498db;font-size:0.8em;margin-right:4px;text-decoration:none;border:1px solid #3498db;padding:2px 6px;border-radius:4px;">Email</a></div>'+(showExt?'<div class="src-ext" style="display:block;margin-top:8px;font-size:0.98em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#ffd500;color:#0a0e14;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">קטע רלוונטי</div><br>'+ext+'</div>':'')+(s.doc_type?'<div style="font-size:0.75em;color:#e67e22;font-weight:700;margin-top:4px;">'+(s.doc_type||'')+(s.erakha?' | '+s.erakha:'')+(s.tik?' | תיק '+s.tik:'')+(s.doc_date?' | '+s.doc_date:'')+'</div>':'')+(s.taktzir?'<div style="font-size:0.85em;color:var(--text);margin-top:6px;line-height:1.6;direction:rtl;background:rgba(255,213,0,0.08);border-radius:6px;padding:8px 12px;">'+(s.judges?'<div style="color:var(--gold);font-weight:700;margin-bottom:4px;">שופטים: '+s.judges+'</div>':'')+(s.tik?'<div style="color:var(--text-dim);font-size:0.9em;margin-bottom:4px;">'+s.tik+'</div>':'')+'<div>'+s.taktzir+'</div></div>':'')+'<div id="ext'+num+'" style="display:none;margin-top:8px;font-size:0.9em;line-height:1.7;color:var(--text);background:rgba(255,213,0,0.12);border-right:3px solid #ffd500;padding:12px;border-radius:6px;direction:rtl;"><div style="background:#e67e22;color:#fff;font-size:0.75em;font-weight:700;padding:2px 8px;border-radius:4px;margin-bottom:8px;display:inline-block;">📄 קטע מתוך המסמך המקורי</div><br>'+s.extrait.split(String.fromCharCode(10)).join('<br>')+'</div></div>';});
-      var srcDiv = document.createElement('div');
-      srcDiv.innerHTML = html;
-      turnDiv.appendChild(srcDiv);
-    }
+    var hdr = '<div class="answer-header"><span class="answer-title">⚖️ תשובה משפטית</span><div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;"><button class="btn-pdf" onclick="exportPDF()">&#x1F4C4; PDF</button><button class="btn-pdf" onclick="copyAnswer()" title="העתק">&#x1F4CB;</button><button class="btn-pdf" onclick="printAnswer()" title="הדפס">&#x1F5A8;&#xFE0F;</button><button class="btn-pdf" onclick="shareWhatsApp()" style="color:#25d366;border-color:#25d366;" title="WhatsApp">&#x1F4AC;</button><button class="btn-pdf" onclick="shareEmail()" title="Email">&#x1F4E7;</button></div></div>';
+    turnDiv.innerHTML = qDiv + hdr + '<div class="answer-body" id="stream-body"><span class="stream-cursor" style="display:inline-block;width:8px;height:1.2em;background:var(--gold);animation:blink-gold 0.8s infinite;vertical-align:text-bottom;margin-right:2px;"></span></div>';
     conv.appendChild(turnDiv);
-    setTimeout(function(){injectTaktzir();},500);
+    window.scrollTo({top:0,behavior:"smooth"});
+
+    var streamBody = document.getElementById('stream-body');
+    var rawText = '';
+    var currentSources = [];
+    var reader = resp.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = '';
+
+    while(true) {
+      var result = await reader.read();
+      if (result.done) break;
+      buffer += decoder.decode(result.value, {stream: true});
+      var lines = buffer.split(String.fromCharCode(10));
+      buffer = lines.pop();
+      for (var li=0; li<lines.length; li++) {
+        var line = lines[li];
+        if (!line.startsWith('data: ')) continue;
+        try {
+          var evt = JSON.parse(line.substring(6));
+          if (evt.type === 'sources') {
+            currentSources = evt.sources;
+            window._fileIds={};window._chunkIds={};
+            currentSources.forEach(function(s,i){if(s.file_id)window._fileIds[i+1]=s.file_id;if(s.chunk!==undefined)window._chunkIds[i+1]=s.chunk;});
+            // Show sources immediately
+            var srcPreview = document.createElement('div');
+            srcPreview.id = 'sources-preview';
+            srcPreview.innerHTML = renderSourcesHtml(currentSources);
+            turnDiv.appendChild(srcPreview);
+          } else if (evt.type === 'token') {
+            rawText += evt.text;
+            streamBody.innerHTML = formatAnswerHtml(rawText) + '<span class="stream-cursor" style="display:inline-block;width:8px;height:1.2em;background:var(--gold);animation:blink-gold 0.8s infinite;vertical-align:text-bottom;margin-right:2px;"></span>';
+          } else if (evt.type === 'correction') {
+            rawText += evt.text;
+          } else if (evt.type === 'sources_update') {
+            currentSources = evt.sources;
+            var oldSrc = document.getElementById('sources-preview');
+            if(oldSrc) oldSrc.innerHTML = renderSourcesHtml(currentSources);
+          } else if (evt.type === 'error') {
+            streamBody.innerHTML += '<br><span style="color:#e74c3c;">שגיאה: '+evt.message+'</span>';
+          } else if (evt.type === 'done') {
+            // Final render
+            streamBody.innerHTML = '<button onclick="readAnswer()" style="background:none;border:1px solid #ffd500;color:#ffd500;border-radius:6px;padding:3px 8px;font-size:0.9em;cursor:pointer;float:left;">🔊 קרא</button>' + formatAnswerHtml(rawText);
+            var disc = document.createElement('div');
+            disc.className='disclaimer';
+            disc.textContent='⚠️ המערכת היא כלי עזר בלבד ואינה מהווה ייעוץ משפטי. יש להתייעץ עם עורך דין או טוען רבני מוסמך.';
+            streamBody.parentNode.insertBefore(disc, streamBody.nextSibling);
+            var suiteBtn = document.createElement('div');
+            suiteBtn.style.cssText='margin-top:12px;text-align:center;';
+            suiteBtn.innerHTML='<button onclick="scrollToQuery()" style="background:linear-gradient(135deg,#1a5c3a,#0f3d26);border:2px solid #ffd500;color:#ffd500;padding:12px 22px;border-radius:8px;font-size:1.05em;font-weight:700;cursor:pointer;animation:blink-gold 1.2s ease-in-out infinite;">שאלה בהמשך ↓</button>';
+            disc.parentNode.insertBefore(suiteBtn, disc.nextSibling);
+            chatHistory.push({q: rawQuery, a: rawText}); updateChatIndicator();
+            document.getElementById('query').value = '';
+            setTimeout(function(){injectTaktzir();},500);
+          }
+        } catch(pe) {}
+      }
+    }
     window.scrollTo({top:0,behavior:"smooth"});
   } catch(e) {
     document.getElementById('loading').style.display='none';
@@ -929,7 +1251,7 @@ document.body.insertAdjacentHTML("beforeend",'<div id="vwr"><div id="vwr-in"><di
 function openVwr(fileId,filename,driveUrl,extrait){
   document.getElementById("vwr-title").textContent=filename;
   document.getElementById("vwr-drive").href=driveUrl;
-  document.getElementById("vwr-body").innerHTML="טוען מסמך...";
+  document.getElementById("vwr-body").innerHTML='<div style="text-align:center;padding:40px;"><div style="display:inline-block;width:36px;height:36px;border:3px solid var(--gold);border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;"></div><div style="margin-top:12px;color:var(--text-dim);">טוען מסמך...</div></div>';
   document.getElementById("vwr").classList.add("open");
   document.body.style.overflow="hidden";
   var q=window._lastQuery||"";
@@ -937,27 +1259,27 @@ function openVwr(fileId,filename,driveUrl,extrait){
     .then(function(r){return r.json();})
     .then(function(data){
       if(data.error){document.getElementById("vwr-body").textContent=data.error;return;}
-      var text=data.text||"";
-      if(q){
-        var words=q.replace(/[^א-תa-zA-Z0-9\s]/g,"").split(/\s+/).filter(function(w){return w.length>2;});
-        words.forEach(function(w){
-          var root=w.length>3?w.substring(0,3):w;
-          var re=new RegExp("("+root+"[א-ת]*)","g");
-          text=text.replace(re,"<mark>$1</mark>");
-        });
-      }
       var body=document.getElementById("vwr-body");
       var extraitHtml="";
       if(extrait&&extrait.length>10){
-        extraitHtml='<div style="background:#ffd500;color:#0a0e14;border-radius:8px;padding:14px 16px;margin-bottom:20px;direction:rtl;font-weight:600;border-right:5px solid #cc9900;">'
-        +'<div style="font-size:0.8em;margin-bottom:6px;opacity:0.7;">📌 קטע רלוונטי מהמאגר</div>'
-        +extrait
-        +'</div><hr style="margin-bottom:20px;opacity:0.2;">';
+        extraitHtml='<div style="background:linear-gradient(135deg,rgba(255,213,0,0.15),rgba(255,213,0,0.05));border:1px solid rgba(255,213,0,0.3);border-radius:10px;padding:16px 18px;margin-bottom:20px;direction:rtl;border-right:4px solid #ffd500;">'
+        +'<div style="font-size:0.75em;margin-bottom:8px;color:var(--gold);font-weight:700;letter-spacing:0.5px;">📌 קטע רלוונטי מהמאגר</div>'
+        +'<div style="line-height:1.8;color:var(--text);font-size:0.95em;">'+extrait+'</div>'
+        +'</div>';
       }
-      if(window._lastQuery){var _w=window._lastQuery.replace(/[^\u05D0-\u05EAa-zA-Z0-9\s]/g,'').split(/\s+/).filter(function(w){return w.length>2;});_w.forEach(function(w){var _r=w.length>3?w.substring(0,3):w;extraitHtml=extraitHtml.replace(new RegExp('('+_r+'[\u05D0-\u05EA]*)','g'),'<mark style="background:#ffd500;color:#0a0e14;border-radius:2px;padding:0 2px;font-weight:700;">$1</mark>');});}
-      body.innerHTML=extraitHtml;
-      setTimeout(function(){var m=body.querySelector("mark");if(m)m.scrollIntoView({block:"center",behavior:"smooth"});},200);
-    }).catch(function(e){document.getElementById("vwr-body").textContent=""+e;});
+      // Use server-side highlighted HTML if available
+      var docHtml = data.html || '';
+      if(!docHtml && data.text){
+        docHtml = data.text.split(String.fromCharCode(10)).map(function(p){
+          return p.trim() ? '<p style="margin:0 0 12px 0;line-height:1.9;text-align:right;">'+p+'</p>' : '';
+        }).join('');
+      }
+      body.innerHTML=extraitHtml
+        +'<div style="direction:rtl;font-size:0.95em;color:var(--text);padding:4px 0;">'
+        +docHtml
+        +'</div>';
+      setTimeout(function(){var m=body.querySelector("mark");if(m)m.scrollIntoView({block:"center",behavior:"smooth"});},300);
+    }).catch(function(e){document.getElementById("vwr-body").textContent="שגיאה: "+e;});
 }
 function copyAnswer(){var a=document.querySelector('.answer-body');if(a){navigator.clipboard.writeText(a.innerText);alert('התשובה הועתקה!');}}
 function printAnswer(){window.print();}
